@@ -379,15 +379,15 @@ These are modeled after proposals from Accenture, Deloitte, McKinsey, Infosys, T
 [
   {
     "id": "team-001",
-    "name": "Adil Sheikh",
-    "title": "Founder & Lead AI Engineer",
-    "photo": "assets/team/adil.jpg",
-    "yearsExperience": 5,
+    "name": "Alex Morgan",
+    "title": "Lead AI Engineer",
+    "photo": "assets/team/alex.jpg",
+    "yearsExperience": 8,
     "expertise": ["AI/ML", "Voice AI", "Full-Stack Development", "System Architecture"],
     "bio": "Full-stack AI engineer specializing in production-grade AI systems. Built autonomous agent systems, AI voice platforms, and generative AI pipelines from scratch.",
     "certifications": ["AWS Solutions Architect", "Google Cloud ML Engineer"],
     "education": "B.Tech Computer Science",
-    "linkedin": "https://linkedin.com/in/adilsheikh"
+    "linkedin": "https://linkedin.com/in/alexmorgan"
   }
 ]
 ```

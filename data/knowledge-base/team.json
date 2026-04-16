@@ -1,14 +1,13 @@
 [
   {
     "id": "team-001",
-    "name": "Adil Sheikh",
-    "title": "Founder & Lead AI Architect",
-    "yearsExperience": 5,
+    "name": "Alex Morgan",
+    "title": "Lead AI Architect",
+    "yearsExperience": 8,
     "expertise": ["AI/ML", "Voice AI", "LLM Orchestration", "Full-Stack Development", "System Architecture"],
-    "bio": "Full-stack AI engineer specializing in production-grade AI systems. Designed and shipped 3 production AI voice platforms across healthcare, lending, and retail. Deep familiarity with LiveKit, multi-tenant compliance, and sub-second latency orchestration.",
+    "bio": "Lead AI architect with deep experience shipping production AI voice platforms across healthcare, lending, and retail. Specialist in LiveKit, multi-tenant compliance, and sub-second latency orchestration.",
     "certifications": ["AWS Solutions Architect", "Google Cloud ML Engineer"],
     "education": "B.Tech Computer Science",
-    "linkedin": "https://www.linkedin.com/in/mohammad-adil-sheikh/",
     "tags": ["leader", "ai", "voice", "architect"]
   },
   {

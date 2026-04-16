@@ -90,8 +90,8 @@ Most "AI proposal" tools give you Markdown or a generic Word doc. ProposalForge 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/Adyl-S/proposalforge.git
-cd proposalforge
+git clone https://github.com/par1kahl/proposals-outreach.git
+cd proposals-outreach
 npm install
 ```
 
@@ -314,8 +314,8 @@ See [`.env.example`](.env.example) for the full template.
 Pull requests welcome. For major changes, please open an issue first to discuss direction.
 
 ```bash
-git clone https://github.com/Adyl-S/proposalforge.git
-cd proposalforge
+git clone https://github.com/par1kahl/proposals-outreach.git
+cd proposals-outreach
 npm install
 npm run dev
 ```
@@ -330,8 +330,6 @@ npm run dev
 
 <div align="center">
 
-Built by **[Mohammad Adil Sheikh](https://github.com/Adyl-S)** · [LinkedIn](https://www.linkedin.com/in/mohammad-adil-sheikh/)
-
-<sub>If this saves you time, a star on the repo is appreciated.</sub>
+<sub>Internal tool · please contribute improvements via pull requests.</sub>
 
 </div>

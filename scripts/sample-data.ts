@@ -63,8 +63,8 @@ export function buildSampleData(): ProposalData {
         { name: 'Full-Stack Engineering', description: 'Next.js, FastAPI, React Native — modern web and mobile applications built for reliability and speed.' },
         { name: 'Cloud & Platform', description: 'AWS, GCP, Azure — scalable, cost-optimized, SOC 2 compliant infrastructure with 99.95% uptime SLAs.' },
       ],
-      signatoryName: 'Adil Sheikh',
-      signatoryTitle: 'Founder',
+      signatoryName: 'Authorized Signatory',
+      signatoryTitle: 'Director',
     },
     toc: [
       { number: '01', title: 'Executive Summary', page: 3, major: true },
@@ -206,7 +206,7 @@ export function buildSampleData(): ProposalData {
       introduction:
         'A dedicated seven-person squad, ring-fenced for this engagement end-to-end. Every role is filled by a senior practitioner with shipped enterprise AI production experience.',
       members: [
-        { name: 'Adil Sheikh', title: 'Engagement Lead & Lead AI Architect', initials: getInitials('Adil Sheikh'), yearsExperience: 5, expertiseSummary: 'Production AI voice systems, LLM orchestration', relevance: 'Designed and shipped 3 production AI voice platforms across healthcare, lending, and retail. Deep familiarity with LiveKit, multi-tenant compliance, and sub-second latency orchestration.', roleOnProject: 'Overall technical ownership, architecture decisions, client stakeholder management.' },
+        { name: 'Alex Morgan', title: 'Engagement Lead & Lead AI Architect', initials: getInitials('Alex Morgan'), yearsExperience: 8, expertiseSummary: 'Production AI voice systems, LLM orchestration', relevance: 'Designed and shipped production AI voice platforms across healthcare, lending, and retail. Deep familiarity with LiveKit, multi-tenant compliance, and sub-second latency orchestration.', roleOnProject: 'Overall technical ownership, architecture decisions, client stakeholder management.' },
         { name: 'Priya Natarajan', title: 'Conversational AI Design Lead', initials: 'PN', yearsExperience: 9, expertiseSummary: 'CX design, dialogue architecture, multilingual UX', relevance: 'Former head of CX at a top-3 private bank. Designed IVR and chatbot flows for 40M+ customers. Native-fluent across Hindi, Tamil, Marathi.', roleOnProject: 'Owns end-to-end conversation design, intent coverage, and UX acceptance.' },
         { name: 'Rohan Desai', title: 'Principal Backend Engineer', initials: 'RD', yearsExperience: 11, expertiseSummary: 'Distributed systems, FastAPI, event streaming', relevance: '11 years scaling fintech backends at Razorpay, CRED, and Navi. Built the unified context layer for a top-5 insurer.', roleOnProject: 'Technical lead for the context service, integration layer, and streaming platform.' },
         { name: 'Ananya Iyer', title: 'Senior ML Engineer', initials: 'AI', yearsExperience: 7, expertiseSummary: 'LLM fine-tuning, eval pipelines, RAG', relevance: 'Built evaluation pipelines for two tier-1 banking chatbots. Published on safety-aware LLM routing.', roleOnProject: 'Owns the decision engine, evaluation infrastructure, and model governance.' },
