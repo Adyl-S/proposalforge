@@ -330,7 +330,7 @@ npm run dev
 
 <div align="center">
 
-Built by **[Adil Sheikh](https://github.com/Adyl-S)** · [LinkedIn](https://linkedin.com/in/adilsheikh)
+Built by **[Mohammad Adil Sheikh](https://github.com/Adyl-S)** · [LinkedIn](https://www.linkedin.com/in/mohammad-adil-sheikh/)
 
 <sub>If this saves you time, a star on the repo is appreciated.</sub>
 
