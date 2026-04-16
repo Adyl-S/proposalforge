@@ -1,0 +1,85 @@
+[
+  {
+    "id": "team-001",
+    "name": "Adil Sheikh",
+    "title": "Founder & Lead AI Architect",
+    "yearsExperience": 5,
+    "expertise": ["AI/ML", "Voice AI", "LLM Orchestration", "Full-Stack Development", "System Architecture"],
+    "bio": "Full-stack AI engineer specializing in production-grade AI systems. Designed and shipped 3 production AI voice platforms across healthcare, lending, and retail. Deep familiarity with LiveKit, multi-tenant compliance, and sub-second latency orchestration.",
+    "certifications": ["AWS Solutions Architect", "Google Cloud ML Engineer"],
+    "education": "B.Tech Computer Science",
+    "linkedin": "https://linkedin.com/in/adilsheikh",
+    "tags": ["leader", "ai", "voice", "architect"]
+  },
+  {
+    "id": "team-002",
+    "name": "Priya Natarajan",
+    "title": "Conversational AI Design Lead",
+    "yearsExperience": 9,
+    "expertise": ["CX Design", "Dialogue Architecture", "Multilingual UX", "Intent Modeling"],
+    "bio": "Former head of CX at a top-3 private bank. Designed IVR and chatbot flows for 40M+ customers. Native-fluent across Hindi, Tamil, Marathi. Brings deep understanding of vernacular enterprise UX.",
+    "education": "M.Des Interaction Design, IIT Bombay",
+    "tags": ["design", "cx", "conversational", "multilingual"]
+  },
+  {
+    "id": "team-003",
+    "name": "Rohan Desai",
+    "title": "Principal Backend Engineer",
+    "yearsExperience": 11,
+    "expertise": ["Distributed Systems", "FastAPI", "Event Streaming", "Postgres", "Kafka"],
+    "bio": "11 years scaling fintech backends at Razorpay, CRED, and Navi. Built the unified context layer for a top-5 insurer. Specialist in high-throughput, low-latency transactional systems.",
+    "education": "B.Tech + M.Tech Computer Science, IIT Delhi",
+    "tags": ["backend", "distributed-systems", "fintech"]
+  },
+  {
+    "id": "team-004",
+    "name": "Ananya Iyer",
+    "title": "Senior ML Engineer",
+    "yearsExperience": 7,
+    "expertise": ["LLM Fine-tuning", "Eval Pipelines", "RAG", "Safety", "LangGraph"],
+    "bio": "Built evaluation pipelines for two tier-1 banking chatbots. Published research on safety-aware LLM routing at NeurIPS. Expert in RAG architectures and LLM eval.",
+    "certifications": ["DeepLearning.AI ML Specialization"],
+    "education": "M.S. Machine Learning, CMU",
+    "tags": ["ml", "llm", "eval", "rag"]
+  },
+  {
+    "id": "team-005",
+    "name": "Vikram Seshadri",
+    "title": "Security & Compliance Lead",
+    "yearsExperience": 14,
+    "expertise": ["RBI Compliance", "DPDPA", "SOC 2", "Threat Modeling", "Internal Audit"],
+    "bio": "Led compliance delivery for two RBI-regulated AI deployments. Former internal auditor at HDFC. Deep familiarity with Indian regulatory landscape for financial services.",
+    "certifications": ["CISA", "CISSP", "ISO 27001 Lead Auditor"],
+    "tags": ["security", "compliance", "rbi", "audit"]
+  },
+  {
+    "id": "team-006",
+    "name": "Meera Pillai",
+    "title": "Site Reliability Engineer",
+    "yearsExperience": 8,
+    "expertise": ["AWS", "Terraform", "Observability", "Incident Response", "Kubernetes"],
+    "bio": "Operated 9-figure-scale transactional platforms with 99.97% uptime. Incident-commander certified. Built the on-call and observability stack for two high-growth fintechs.",
+    "certifications": ["AWS DevOps Professional", "CKA"],
+    "tags": ["sre", "devops", "observability"]
+  },
+  {
+    "id": "team-007",
+    "name": "Karthik Rao",
+    "title": "Delivery Manager",
+    "yearsExperience": 12,
+    "expertise": ["Agile Delivery", "Banking Program Management", "Risk Tracking", "Stakeholder Management"],
+    "bio": "Delivered 11 enterprise banking programs on-time and on-budget. Expert in navigating large-enterprise governance and change-management processes.",
+    "certifications": ["PMP", "SAFe 5.0 Program Consultant"],
+    "tags": ["delivery", "pmo", "agile"]
+  },
+  {
+    "id": "team-008",
+    "name": "Nikhil Menon",
+    "title": "Senior Frontend Engineer",
+    "yearsExperience": 9,
+    "expertise": ["Next.js", "React", "TypeScript", "Design Systems", "WebRTC"],
+    "bio": "Built three enterprise design systems used by 500+ engineers. Deep expertise in performant React and real-time UIs. Led the agent-desktop build for a top-3 Indian bank.",
+    "education": "B.E. Computer Science, NITK",
+    "tags": ["frontend", "react", "nextjs", "design-systems"]
+  }
+]

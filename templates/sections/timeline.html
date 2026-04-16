@@ -1,0 +1,38 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">07 — Timeline</span>
+    <h2>Project Timeline</h2>
+    <p class="subtitle">End-to-end delivery schedule across {{timeline.totalDuration}}</p>
+  </div>
+
+  <div class="timeline-wrap">
+    {{#timeline.chartImage}}
+    <img src="{{timeline.chartImage}}" alt="Project Timeline"/>
+    {{/timeline.chartImage}}
+    {{^timeline.chartImage}}
+    <p class="text-muted text-center" style="padding:20mm 0">Timeline chart renders here</p>
+    {{/timeline.chartImage}}
+  </div>
+
+  <h3 style="margin-top:6mm">Phase Breakdown</h3>
+  <table class="deliverables-table">
+    <thead>
+      <tr>
+        <th style="width:10mm">#</th>
+        <th>Phase</th>
+        <th style="width:30mm">Duration</th>
+        <th style="width:35mm">Start</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#timeline.phases}}
+      <tr>
+        <td><strong>{{num}}</strong></td>
+        <td><strong>{{name}}</strong><br/><span style="font-size:9pt;color:var(--c-muted)">{{focus}}</span></td>
+        <td>{{duration}}</td>
+        <td>{{start}}</td>
+      </tr>
+      {{/timeline.phases}}
+    </tbody>
+  </table>
+</section>

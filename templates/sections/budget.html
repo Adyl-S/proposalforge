@@ -1,0 +1,66 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">10 — Investment</span>
+    <h2>Investment & Pricing</h2>
+    <p class="subtitle">Transparent, milestone-aligned pricing with no hidden costs</p>
+  </div>
+
+  <span class="pricing-model-pill">Pricing Model — {{budget.pricingModel}}</span>
+
+  <div class="budget-layout">
+    <table class="budget-table">
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th style="width:22mm" class="num">Effort (PD)</th>
+          <th style="width:32mm" class="num">Investment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#budget.phases}}
+        <tr>
+          <td><strong>{{name}}</strong><br/><span style="font-size:9pt;color:var(--c-muted)">{{focus}}</span></td>
+          <td class="num">{{effort}}</td>
+          <td class="num">{{cost}}</td>
+        </tr>
+        {{/budget.phases}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total Investment</td>
+          <td class="num">{{budget.totalEffort}}</td>
+          <td class="num">{{budget.totalCost}}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="budget-chart-wrap">
+      {{#budget.chartImage}}
+      <img src="{{budget.chartImage}}" alt="Budget breakdown"/>
+      {{/budget.chartImage}}
+      {{^budget.chartImage}}
+      <p class="text-muted text-center">Budget chart</p>
+      {{/budget.chartImage}}
+    </div>
+  </div>
+
+  <h3 style="margin-top:7mm">Payment Milestones</h3>
+  <div class="payment-schedule">
+    <div class="payment-row head">
+      <span>#</span>
+      <span>Milestone</span>
+      <span>Trigger</span>
+      <span class="amount">Amount</span>
+    </div>
+    {{#budget.paymentMilestones}}
+    <div class="payment-row">
+      <span><strong>{{num}}</strong></span>
+      <span><strong>{{name}}</strong></span>
+      <span style="font-size:9pt;color:var(--c-muted)">{{trigger}}</span>
+      <span class="amount">{{amount}}</span>
+    </div>
+    {{/budget.paymentMilestones}}
+  </div>
+
+  <p style="margin-top:6mm;font-size:9pt;color:var(--c-muted)"><strong>Note:</strong> {{budget.notes}}</p>
+</section>

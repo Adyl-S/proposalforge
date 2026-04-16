@@ -1,0 +1,45 @@
+# ─ Dependencies ─
+node_modules/
+
+# ─ Build output ─
+.next/
+out/
+build/
+dist/
+
+# ─ Env / Secrets (NEVER commit these) ─
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ─ Logs ─
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─ OS ─
+.DS_Store
+Thumbs.db
+
+# ─ Editors ─
+.vscode/
+.idea/
+*.swp
+
+# ─ Local generated proposals (user content) ─
+data/proposals/*/
+!data/proposals/.gitkeep
+
+# ─ Test output ─
+test-output/
+
+# ─ PDFs (only track curated samples in docs/pdf-samples/) ─
+*.pdf
+!docs/pdf-samples/*.pdf
+
+# ─ TypeScript build info ─
+*.tsbuildinfo
+next-env.d.ts.timestamp

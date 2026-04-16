@@ -1,0 +1,30 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">03 — The Challenge</span>
+    <h2>Understanding the Challenge</h2>
+    <p class="subtitle">Our assessment of the current state and the business impact of inaction</p>
+  </div>
+
+  <p class="lead" style="padding:0;background:none;border:none;">{{problemStatement.currentState}}</p>
+
+  <h3 style="margin-top:6mm">Pain Points Identified</h3>
+  <div class="pain-points">
+    {{#problemStatement.painPoints}}
+    <div class="pain-point">
+      <div class="pain-num">{{num}}</div>
+      <div class="pain-body">
+        <h5>{{title}}</h5>
+        <p>{{description}}</p>
+      </div>
+    </div>
+    {{/problemStatement.painPoints}}
+  </div>
+
+  <div class="callout-box">
+    <h6>Business Impact</h6>
+    <p>{{problemStatement.businessImpact}}</p>
+  </div>
+
+  <h3>Industry Context</h3>
+  <p>{{problemStatement.industryContext}}</p>
+</section>

@@ -1,0 +1,33 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">13 — Why Us</span>
+    <h2>Why Choose {{company.name}}</h2>
+    <p class="subtitle">Six reasons leading enterprises trust us with mission-critical programs</p>
+  </div>
+
+  <div class="differentiators">
+    {{#whyUs.differentiators}}
+    <div class="diff-card">
+      <div class="diff-icon">{{icon}}</div>
+      <h5>{{headline}}</h5>
+      <p>{{description}}</p>
+    </div>
+    {{/whyUs.differentiators}}
+  </div>
+
+  <div class="awards-strip">
+    {{#whyUs.stats}}
+    <div class="award-item">
+      <span class="num">{{value}}</span>
+      <span class="lbl">{{label}}</span>
+    </div>
+    {{/whyUs.stats}}
+  </div>
+
+  {{#whyUs.featuredTestimonial}}
+  <div class="testimonial" style="margin-top:7mm">
+    <p class="testimonial-quote">{{quote}}</p>
+    <p class="testimonial-author"><strong>{{author}}</strong> · {{authorTitle}}</p>
+  </div>
+  {{/whyUs.featuredTestimonial}}
+</section>

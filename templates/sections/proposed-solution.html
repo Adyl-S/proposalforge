@@ -1,0 +1,45 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">04 — The Solution</span>
+    <h2>Proposed Solution</h2>
+    <p class="subtitle">A purpose-built architecture aligned to your business goals</p>
+  </div>
+
+  <div class="solution-overview">
+    <h4>Solution Overview</h4>
+    <p style="margin:0">{{proposedSolution.overview}}</p>
+  </div>
+
+  <h3>Key Components</h3>
+  <div class="components-grid">
+    {{#proposedSolution.components}}
+    <div class="component-card">
+      <h5>{{name}}</h5>
+      <p>{{description}}</p>
+    </div>
+    {{/proposedSolution.components}}
+  </div>
+
+  <h3 style="margin-top:7mm">Integration Points</h3>
+  <ul class="bullets-enhanced">
+    {{#proposedSolution.integrations}}
+    <li>{{.}}</li>
+    {{/proposedSolution.integrations}}
+  </ul>
+
+  <div class="tech-stack">
+    <h6>Recommended Technology Stack</h6>
+    <div class="tech-stack-tags">
+      {{#proposedSolution.techStack}}
+      <span class="tech-tag">{{.}}</span>
+      {{/proposedSolution.techStack}}
+    </div>
+  </div>
+
+  <h3 style="margin-top:7mm">Innovation Differentiators</h3>
+  <ul class="bullets-enhanced">
+    {{#proposedSolution.innovations}}
+    <li>{{.}}</li>
+    {{/proposedSolution.innovations}}
+  </ul>
+</section>

@@ -1,0 +1,52 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">02 — About Us</span>
+    <h2>{{company.name}}</h2>
+    <p class="subtitle">{{company.tagline}}</p>
+  </div>
+
+  <p class="lead" style="padding:0;background:none;border:none;">{{company.mission}}</p>
+
+  <div class="company-stats">
+    <div class="stat-card">
+      <span class="stat-value">{{company.yearsInBusiness}}<span class="plus">+</span></span>
+      <span class="stat-label">Years Delivering</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{company.teamSize}}<span class="plus">+</span></span>
+      <span class="stat-label">Experts On Team</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{company.projectsDelivered}}<span class="plus">+</span></span>
+      <span class="stat-label">Projects Delivered</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{company.industriesCount}}</span>
+      <span class="stat-label">Industries Served</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:7mm">Core Competencies</h3>
+  <div class="competencies">
+    {{#company.coreCompetencies}}
+    <div class="competency-card">
+      <h5>{{name}}</h5>
+      <p>{{description}}</p>
+    </div>
+    {{/company.coreCompetencies}}
+  </div>
+
+  <h3 style="margin-top:7mm">Certifications & Partnerships</h3>
+  <div class="certifications-row">
+    {{#company.certifications}}
+    <span class="cert-badge">{{.}}</span>
+    {{/company.certifications}}
+  </div>
+
+  <h3 style="margin-top:5mm">Industries We Serve</h3>
+  <div class="industries-list">
+    {{#company.industriesServed}}
+    <span class="industry-tag">{{.}}</span>
+    {{/company.industriesServed}}
+  </div>
+</section>

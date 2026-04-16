@@ -1,0 +1,39 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">06 — Deliverables</span>
+    <h2>Deliverables & Milestones</h2>
+    <p class="subtitle">What you receive, when you receive it, and how we define "done"</p>
+  </div>
+
+  <table class="deliverables-table">
+    <thead>
+      <tr>
+        <th style="width:22mm">Phase</th>
+        <th>Deliverable</th>
+        <th>Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#deliverables.items}}
+      <tr>
+        <td><span class="phase-tag">{{phase}}</span></td>
+        <td><strong>{{name}}</strong><br/><span style="font-size:9pt;color:var(--c-muted)">{{description}}</span></td>
+        <td>{{acceptance}}</td>
+      </tr>
+      {{/deliverables.items}}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:8mm">Key Milestones</h3>
+  <div class="milestones-list">
+    {{#deliverables.milestones}}
+    <div class="milestone-item">
+      <div class="milestone-diamond"></div>
+      <div>
+        <div class="milestone-text">{{name}}</div>
+        <div class="milestone-date">{{target}}</div>
+      </div>
+    </div>
+    {{/deliverables.milestones}}
+  </div>
+</section>

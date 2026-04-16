@@ -1,0 +1,41 @@
+<section class="page exec-summary">
+  <div class="section-header">
+    <span class="section-number">01 — Executive Summary</span>
+    <h2>At a Glance</h2>
+    <p class="subtitle">Our understanding of your challenge and the partnership we propose</p>
+  </div>
+
+  <p class="lead">{{executiveSummary.openingHook}}</p>
+
+  <h4>Our Understanding</h4>
+  <p>{{executiveSummary.understanding}}</p>
+
+  <h4>Proposed Solution</h4>
+  <ul class="bullets-enhanced">
+    {{#executiveSummary.solutionBullets}}
+    <li>{{.}}</li>
+    {{/executiveSummary.solutionBullets}}
+  </ul>
+
+  <h4>Expected Business Outcomes</h4>
+  <div class="metrics-row">
+    {{#executiveSummary.expectedOutcomes}}
+    <div class="metric-card">
+      <span class="metric-label">{{metric}}</span>
+      <span class="metric-value">{{value}}</span>
+      <p class="metric-desc">{{description}}</p>
+    </div>
+    {{/executiveSummary.expectedOutcomes}}
+  </div>
+
+  <div class="investment-callout">
+    <div>
+      <div class="label">Investment Overview</div>
+      <div class="value">{{executiveSummary.investmentRange}}</div>
+    </div>
+    <div class="accent-pill">{{executiveSummary.pricingModel}}</div>
+  </div>
+
+  <h4>Why {{company.name}}</h4>
+  <p>{{executiveSummary.closingStatement}}</p>
+</section>

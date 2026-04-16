@@ -1,0 +1,40 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">05 — Methodology</span>
+    <h2>How We Deliver</h2>
+    <p class="subtitle">{{methodology.approach}} — Built for predictability, transparency, and quality</p>
+  </div>
+
+  <p>{{methodology.summary}}</p>
+
+  <h3 style="margin-top:6mm">Delivery Phases</h3>
+  <div class="phases-flow">
+    {{#methodology.phases}}
+    <div class="phase-card">
+      <div class="phase-num">Phase {{num}}</div>
+      <h5>{{name}}</h5>
+      <p>{{description}}</p>
+      <div class="phase-duration">{{duration}}</div>
+    </div>
+    {{/methodology.phases}}
+  </div>
+
+  <div class="grid grid-2" style="margin-top:7mm">
+    <div class="gov-card">
+      <h5>Quality Assurance</h5>
+      <ul>
+        {{#methodology.qa}}
+        <li>{{.}}</li>
+        {{/methodology.qa}}
+      </ul>
+    </div>
+    <div class="gov-card">
+      <h5>Communication Cadence</h5>
+      <ul>
+        {{#methodology.communication}}
+        <li>{{.}}</li>
+        {{/methodology.communication}}
+      </ul>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,25 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">14 — Terms</span>
+    <h2>Terms & Conditions</h2>
+    <p class="subtitle">Commercial terms governing this proposal and subsequent engagement</p>
+  </div>
+
+  <div class="terms-columns">
+    {{#terms.clauses}}
+    <h5>{{title}}</h5>
+    <p>{{body}}</p>
+    {{/terms.clauses}}
+  </div>
+
+  <div class="investment-callout" style="margin-top:7mm">
+    <div>
+      <div class="label">Proposal Validity</div>
+      <div class="value" style="font-size:16pt">{{terms.validity}}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="label">Signed by {{company.name}}</div>
+      <div style="font-size:10pt;color:rgba(255,255,255,0.85);margin-top:2mm">{{company.signatoryName}}, {{company.signatoryTitle}}</div>
+    </div>
+  </div>
+</section>

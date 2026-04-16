@@ -1,0 +1,473 @@
+/**
+ * Proposal Orchestrator.
+ * Takes user input + KB, calls every section prompt in parallel,
+ * merges with KB data (team, case studies, company), produces full ProposalData,
+ * and renders SVG charts. Ready to feed into the HTML template + Puppeteer.
+ */
+
+import { generate, hasAnyAiProvider } from './ai-client';
+import { executiveSummaryPrompt } from './prompts/executive-summary';
+import { problemStatementPrompt } from './prompts/problem-statement';
+import { proposedSolutionPrompt } from './prompts/proposed-solution';
+import { methodologyPrompt } from './prompts/methodology';
+import { deliverablesPrompt } from './prompts/deliverables';
+import { timelinePrompt } from './prompts/timeline';
+import { budgetPrompt } from './prompts/budget';
+import { riskMitigationPrompt } from './prompts/risk-mitigation';
+import { governancePrompt } from './prompts/governance';
+import { whyUsPrompt } from './prompts/why-us';
+import { termsPrompt } from './prompts/terms';
+import { teamSelectionPrompt } from './prompts/team-selection';
+import { caseStudySelectionPrompt } from './prompts/case-study-selection';
+import * as fb from './fallbacks';
+import type { ProposalInput } from './types';
+import type { KnowledgeBase, KBTeamMember, KBProject } from '@/lib/knowledge-base/types';
+import type { ProposalData, TeamMemberRendered, CaseStudyRendered } from '@/lib/pdf/types';
+import {
+  renderBudgetDonut,
+  renderTimelineGantt,
+} from '@/lib/utils/chart-renderer';
+import { formatDate, getInitials, fileToDataUri } from '@/lib/utils/helpers';
+import { assetPath } from '@/lib/knowledge-base/manager';
+
+export interface OrchestratorProgress {
+  section: string;
+  status: 'start' | 'done' | 'fallback';
+  elapsedMs?: number;
+}
+
+export type ProgressCb = (evt: OrchestratorProgress) => void;
+
+interface AiSection<T> {
+  run: () => Promise<T>;
+  fallback: () => T;
+  key: string;
+}
+
+async function runSection<T>(s: AiSection<T>, onProgress?: ProgressCb): Promise<T> {
+  const start = Date.now();
+  onProgress?.({ section: s.key, status: 'start' });
+  try {
+    const out = await s.run();
+    onProgress?.({ section: s.key, status: 'done', elapsedMs: Date.now() - start });
+    return out;
+  } catch (err) {
+    console.warn(`[orchestrator] section "${s.key}" failed — using fallback:`, err);
+    onProgress?.({ section: s.key, status: 'fallback', elapsedMs: Date.now() - start });
+    return s.fallback();
+  }
+}
+
+const PROB_CLASS = (s: string): 'high' | 'med' | 'low' => {
+  const v = s.toLowerCase();
+  if (v.startsWith('h')) return 'high';
+  if (v.startsWith('l')) return 'low';
+  return 'med';
+};
+
+function formatAmount(amt: number, currency: string): string {
+  if (currency === 'INR') {
+    // Indian grouping
+    return `₹${amt.toLocaleString('en-IN')}`;
+  }
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amt);
+}
+
+function selectTeamMembers(
+  members: KBTeamMember[],
+  aiSelections: { id: string; roleOnProject: string; relevance: string }[] | undefined,
+  explicitIds?: string[],
+): Array<{ member: KBTeamMember; roleOnProject: string; relevance: string }> {
+  if (explicitIds?.length) {
+    return explicitIds
+      .map((id) => members.find((m) => m.id === id))
+      .filter((m): m is KBTeamMember => !!m)
+      .map((m) => ({
+        member: m,
+        roleOnProject: `${m.title} on the engagement.`,
+        relevance: m.bio,
+      }));
+  }
+  if (aiSelections?.length) {
+    const out: Array<{ member: KBTeamMember; roleOnProject: string; relevance: string }> = [];
+    for (const sel of aiSelections) {
+      const m = members.find((x) => x.id === sel.id);
+      if (m) out.push({ member: m, roleOnProject: sel.roleOnProject, relevance: sel.relevance });
+    }
+    if (out.length > 0) return out;
+  }
+  // Fallback — first 5 members
+  return members.slice(0, 5).map((m) => ({
+    member: m,
+    roleOnProject: `${m.title} on the engagement.`,
+    relevance: m.bio,
+  }));
+}
+
+function selectCaseStudies(
+  projects: KBProject[],
+  aiSelections: { id: string; reason: string }[] | undefined,
+  explicitIds?: string[],
+): KBProject[] {
+  if (explicitIds?.length) {
+    return explicitIds.map((id) => projects.find((p) => p.id === id)).filter((p): p is KBProject => !!p);
+  }
+  if (aiSelections?.length) {
+    const out: KBProject[] = [];
+    for (const sel of aiSelections) {
+      const p = projects.find((x) => x.id === sel.id);
+      if (p) out.push(p);
+    }
+    if (out.length > 0) return out;
+  }
+  return projects.slice(0, 3);
+}
+
+// ────────────────────────────────────────────────────────────
+// MAIN
+// ────────────────────────────────────────────────────────────
+export async function generateProposalData(
+  input: ProposalInput,
+  kb: KnowledgeBase,
+  onProgress?: ProgressCb,
+): Promise<ProposalData> {
+  const useAi = hasAnyAiProvider();
+  const currency = input.currency ?? 'USD';
+
+  // Kick off all parallelizable AI calls
+  const companySnapshot = kb.company;
+  const phaseNamesDefault = ['Discovery & Design', 'Foundation Build', 'Core Implementation', 'Integration & QA', 'UAT & Rollout'];
+
+  const [execRaw, problemRaw, solutionRaw, methRaw, deliverablesRaw, timelineRaw, budgetRaw, riskRaw, govRaw, whyRaw, termsRaw, teamRaw, casesRaw] =
+    await Promise.all([
+      runSection(
+        {
+          key: 'executiveSummary',
+          run: async () =>
+            useAi
+              ? ((await generate(executiveSummaryPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackExecutiveSummary(input, companySnapshot)
+              : fb.fallbackExecutiveSummary(input, companySnapshot),
+          fallback: () => fb.fallbackExecutiveSummary(input, companySnapshot),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'problemStatement',
+          run: async () =>
+            useAi
+              ? ((await generate(problemStatementPrompt(input))).parsed as any) ?? fb.fallbackProblemStatement(input)
+              : fb.fallbackProblemStatement(input),
+          fallback: () => fb.fallbackProblemStatement(input),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'proposedSolution',
+          run: async () =>
+            useAi
+              ? ((await generate(proposedSolutionPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackProposedSolution(input)
+              : fb.fallbackProposedSolution(input),
+          fallback: () => fb.fallbackProposedSolution(input),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'methodology',
+          run: async () =>
+            useAi
+              ? ((await generate(methodologyPrompt(input))).parsed as any) ?? fb.fallbackMethodology(input)
+              : fb.fallbackMethodology(input),
+          fallback: () => fb.fallbackMethodology(input),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'deliverables',
+          run: async () =>
+            useAi
+              ? ((await generate(deliverablesPrompt(input, phaseNamesDefault))).parsed as any) ?? fb.fallbackDeliverables(phaseNamesDefault)
+              : fb.fallbackDeliverables(phaseNamesDefault),
+          fallback: () => fb.fallbackDeliverables(phaseNamesDefault),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'timeline',
+          run: async () =>
+            useAi
+              ? ((await generate(timelinePrompt(input))).parsed as any) ?? fb.fallbackTimeline(input)
+              : fb.fallbackTimeline(input),
+          fallback: () => fb.fallbackTimeline(input),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'budget',
+          run: async () =>
+            useAi
+              ? ((await generate(budgetPrompt(input, phaseNamesDefault))).parsed as any) ?? fb.fallbackBudget(input, phaseNamesDefault)
+              : fb.fallbackBudget(input, phaseNamesDefault),
+          fallback: () => fb.fallbackBudget(input, phaseNamesDefault),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'riskMitigation',
+          run: async () =>
+            useAi
+              ? ((await generate(riskMitigationPrompt(input))).parsed as any) ?? fb.fallbackRiskMitigation()
+              : fb.fallbackRiskMitigation(),
+          fallback: () => fb.fallbackRiskMitigation(),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'governance',
+          run: async () =>
+            useAi
+              ? ((await generate(governancePrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackGovernance(companySnapshot)
+              : fb.fallbackGovernance(companySnapshot),
+          fallback: () => fb.fallbackGovernance(companySnapshot),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'whyUs',
+          run: async () =>
+            useAi
+              ? ((await generate(whyUsPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackWhyUs(companySnapshot)
+              : fb.fallbackWhyUs(companySnapshot),
+          fallback: () => fb.fallbackWhyUs(companySnapshot),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'terms',
+          run: async () =>
+            useAi
+              ? ((await generate(termsPrompt(input))).parsed as any) ?? fb.fallbackTerms()
+              : fb.fallbackTerms(),
+          fallback: () => fb.fallbackTerms(),
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'teamSelection',
+          run: async () => {
+            if (!useAi || kb.team.length === 0) return undefined;
+            const r = await generate(teamSelectionPrompt(input, kb.team));
+            return (r.parsed as any)?.selections as { id: string; roleOnProject: string; relevance: string }[] | undefined;
+          },
+          fallback: () => undefined,
+        },
+        onProgress,
+      ),
+      runSection(
+        {
+          key: 'caseStudySelection',
+          run: async () => {
+            if (!useAi || kb.projects.length === 0) return undefined;
+            const r = await generate(caseStudySelectionPrompt(input, kb.projects));
+            return (r.parsed as any)?.selections as { id: string; reason: string }[] | undefined;
+          },
+          fallback: () => undefined,
+        },
+        onProgress,
+      ),
+    ]);
+
+  // ────── Build derived objects ──────
+  const phaseNamesForBudget = methRaw?.phases?.map((p: any) => p.name) ?? phaseNamesDefault;
+
+  // Timeline chart
+  const timelineChart = renderTimelineGantt(
+    (timelineRaw.phases ?? []).map((p: any) => ({
+      name: p.name,
+      startWeek: p.startWeek ?? 0,
+      durationWeeks: p.durationWeeks ?? 4,
+    })),
+    timelineRaw.totalWeeks ?? input.timelineWeeks ?? 24,
+    (timelineRaw.milestones ?? []).map((m: any) => ({ label: m.label, atWeek: m.atWeek })),
+  );
+
+  // Budget chart
+  const budgetChart = renderBudgetDonut(
+    (budgetRaw.phases ?? []).map((p: any) => ({ label: p.name, value: p.amount ?? p.cost ?? 0 })),
+  );
+
+  // Team (merge KB + AI selection)
+  const teamIncluded = input.includeTeamBios !== false && kb.team.length > 0;
+  const teamSelected = teamIncluded
+    ? selectTeamMembers(kb.team, teamRaw as any, input.teamMemberIds)
+    : [];
+
+  const teamMembers: TeamMemberRendered[] = teamSelected.map(({ member, roleOnProject, relevance }) => {
+    const photoUri = member.photoPath ? fileToDataUri(assetPath(member.photoPath)) : undefined;
+    return {
+      name: member.name,
+      title: member.title,
+      initials: getInitials(member.name),
+      photoDataUri: photoUri,
+      yearsExperience: member.yearsExperience,
+      expertiseSummary: member.expertise.slice(0, 3).join(', '),
+      relevance,
+      roleOnProject,
+    };
+  });
+
+  // Case studies
+  const csIncluded = input.includeCaseStudies !== false && kb.projects.length > 0;
+  const csSelected = csIncluded
+    ? selectCaseStudies(kb.projects, casesRaw as any, input.caseStudyIds)
+    : [];
+
+  const caseStudies: CaseStudyRendered[] = csSelected.map((p) => ({
+    title: p.title,
+    clientIndustry: `${p.clientIndustry} · ${p.client}`,
+    year: p.year,
+    duration: p.duration,
+    challenge: p.challenge,
+    solution: p.solution,
+    outcome: p.results.slice(0, 2).join(' '),
+    metrics: p.metrics ?? p.results.slice(0, 3).map((r, i) => ({ value: `#${i + 1}`, label: r })),
+    technologies: p.technologies,
+    testimonial: p.testimonial
+      ? { quote: p.testimonial.quote, author: p.testimonial.author, authorTitle: p.testimonial.title }
+      : undefined,
+  }));
+
+  // Build canonical ProposalData
+  const companyLogoUri = companySnapshot.logoPath
+    ? fileToDataUri(assetPath(companySnapshot.logoPath))
+    : undefined;
+  const yearsInBusiness = new Date().getFullYear() - companySnapshot.founded;
+
+  const version = input.proposalVersion ?? '1.0';
+  const data: ProposalData = {
+    proposal: {
+      projectTitle: input.projectTitle,
+      projectSubtitle: input.projectPrompt.slice(0, 260),
+      clientName: input.clientName,
+      clientIndustry: input.clientIndustry,
+      version,
+      date: formatDate(new Date(), 'long'),
+      validThrough: formatDate(new Date(Date.now() + 60 * 24 * 3600 * 1000), 'long'),
+    },
+    company: {
+      ...companySnapshot,
+      logoDataUri: companyLogoUri,
+      yearsInBusiness,
+      industriesCount: companySnapshot.industriesServed.length,
+    },
+    toc: buildToc(),
+    executiveSummary: execRaw,
+    problemStatement: problemRaw,
+    proposedSolution: solutionRaw,
+    methodology: methRaw,
+    deliverables: deliverablesRaw,
+    timeline: {
+      totalDuration: `${timelineRaw.totalWeeks ?? input.timelineWeeks ?? 24} weeks`,
+      chartImage: timelineChart,
+      phases: (timelineRaw.phases ?? []).map((p: any) => ({
+        num: p.num,
+        name: p.name,
+        focus: p.focus,
+        duration: `${p.durationWeeks} weeks`,
+        start: `Week ${p.startWeek + 1}`,
+      })),
+    },
+    team: {
+      size: teamMembers.length,
+      introduction: teamMembers.length
+        ? `A dedicated ${teamMembers.length}-person squad, ring-fenced for this engagement end-to-end.`
+        : 'Team details provided separately.',
+      members: teamMembers,
+    },
+    caseStudies: { items: caseStudies },
+    budget: {
+      pricingModel: budgetRaw.pricingModelLabel ?? 'Fixed Price',
+      phases: (budgetRaw.phases ?? []).map((p: any) => ({
+        name: p.name,
+        focus: p.focus,
+        effort: `${p.effortPD} PD`,
+        cost: formatAmount(p.amount ?? 0, currency),
+      })),
+      totalEffort: `${(budgetRaw.phases ?? []).reduce((s: number, p: any) => s + (p.effortPD ?? 0), 0)} PD`,
+      totalCost: formatAmount(budgetRaw.totalAmount ?? 0, currency),
+      chartImage: budgetChart,
+      paymentMilestones: (budgetRaw.paymentMilestones ?? []).map((m: any) => ({
+        num: m.num,
+        name: m.name,
+        trigger: m.trigger,
+        amount: formatAmount(m.amount ?? 0, currency),
+      })),
+      notes: budgetRaw.notes ?? '',
+    },
+    riskMitigation: {
+      introduction: riskRaw.introduction,
+      risks: (riskRaw.risks ?? []).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        probability: r.probability,
+        probabilityClass: PROB_CLASS(r.probability ?? 'Medium'),
+        impact: r.impact,
+        impactClass: PROB_CLASS(r.impact ?? 'Medium'),
+        mitigation: r.mitigation,
+      })),
+    },
+    governance: govRaw,
+    whyUs: {
+      differentiators: whyRaw.differentiators ?? [],
+      stats: whyRaw.stats ?? [],
+      featuredTestimonial: pickFeaturedTestimonial(kb.projects),
+    },
+    terms: termsRaw,
+  };
+
+  return data;
+}
+
+function buildToc(): ProposalData['toc'] {
+  return [
+    { number: '01', title: 'Executive Summary', page: 3, major: true },
+    { number: '02', title: 'About Us', page: 5, major: true },
+    { number: '03', title: 'Understanding the Challenge', page: 6, major: true },
+    { number: '04', title: 'Proposed Solution', page: 8, major: true },
+    { number: '05', title: 'Methodology & Approach', page: 10, major: true },
+    { number: '06', title: 'Deliverables & Milestones', page: 11, major: true },
+    { number: '07', title: 'Project Timeline', page: 12, major: true },
+    { number: '08', title: 'Proposed Team', page: 13, major: true },
+    { number: '09', title: 'Relevant Case Studies', page: 14, major: true },
+    { number: '10', title: 'Investment & Pricing', page: 17, major: true },
+    { number: '11', title: 'Risk Mitigation', page: 19, major: true },
+    { number: '12', title: 'Governance & PMO', page: 20, major: true },
+    { number: '13', title: 'Why Choose Us', page: 21, major: true },
+    { number: '14', title: 'Terms & Conditions', page: 22, major: true },
+  ];
+}
+
+function pickFeaturedTestimonial(projects: KBProject[]): { quote: string; author: string; authorTitle: string } | undefined {
+  const withQuote = projects.find((p) => p.testimonial);
+  if (!withQuote?.testimonial) return undefined;
+  return {
+    quote: withQuote.testimonial.quote,
+    author: withQuote.testimonial.author,
+    authorTitle: withQuote.testimonial.title,
+  };
+}

@@ -1,0 +1,99 @@
+[
+  {
+    "id": "proj-001",
+    "title": "AI Voice Agent for Multi-Branch Healthcare Network",
+    "client": "SmileCare Dental Group",
+    "clientIndustry": "Healthcare",
+    "year": 2025,
+    "duration": "3 months",
+    "teamSize": 4,
+    "challenge": "A 40-clinic dental chain was losing 40% of inbound calls to missed or abandoned routing. Frontline staff could not keep pace with demand, and appointment revenue was materially at risk.",
+    "solution": "We shipped an AI voice agent on LiveKit + Deepgram + Gemini with ElevenLabs voice output. The agent handles booking, rescheduling, insurance pre-screening, and reminders autonomously across 3 languages.",
+    "results": [
+      "85% reduction in missed calls within 8 weeks of go-live",
+      "60% lift in appointment bookings",
+      "24/7 availability without adding headcount"
+    ],
+    "metrics": [
+      { "value": "85%", "label": "Reduction in missed calls" },
+      { "value": "60%", "label": "Lift in appointments" },
+      { "value": "24/7", "label": "Availability, no staffing change" }
+    ],
+    "technologies": ["LiveKit", "Deepgram", "Gemini", "ElevenLabs", "FastAPI", "MongoDB"],
+    "testimonial": {
+      "quote": "The AI agent handles calls better than our front-desk staff. It never misses a beat, never gets tired, and never mis-books.",
+      "author": "Dr. Priya Sharma",
+      "title": "Founder, SmileCare Dental Group"
+    },
+    "tags": ["voice-ai", "healthcare", "conversational-ai", "booking"]
+  },
+  {
+    "id": "proj-002",
+    "title": "Real-Time Credit Decisioning Agent for Digital Lender",
+    "client": "NovaLend (anonymized)",
+    "clientIndustry": "Fintech",
+    "year": 2025,
+    "duration": "5 months",
+    "teamSize": 6,
+    "challenge": "An RBI-licensed digital lender needed a conversational agent to run guided disclosures and collect KYC-compatible consent for personal loans in vernacular languages — at scale, with full audit trails.",
+    "solution": "We delivered a compliance-first voice agent integrated with the lender's credit engine. The agent performs layered disclosures, collects and time-stamps consent, and hands off to human underwriters when policy requires.",
+    "results": [
+      "31% lift in onboarding conversion with zero delinquency increase",
+      "Passed full RBI audit on first submission",
+      "<5% escalation rate to human underwriters"
+    ],
+    "metrics": [
+      { "value": "31%", "label": "Lift in onboarding conversion" },
+      { "value": "100%", "label": "First-pass RBI audit clearance" },
+      { "value": "<5%", "label": "Escalation rate to humans" }
+    ],
+    "technologies": ["LiveKit", "Whisper", "Claude 3.5", "PostgreSQL", "Terraform", "AWS Mumbai"],
+    "tags": ["fintech", "lending", "compliance", "voice-ai", "rbi"]
+  },
+  {
+    "id": "proj-003",
+    "title": "AI-Augmented Claims Triage for Health Insurance",
+    "client": "Aarogya Insurance (anonymized)",
+    "clientIndustry": "Insurance",
+    "year": 2024,
+    "duration": "4 months",
+    "teamSize": 5,
+    "challenge": "A health insurer processed 12k monthly claims manually, with a 7-day average turnaround and a 22% re-work rate from document inconsistencies.",
+    "solution": "We built a multi-modal AI triage layer that classifies claims, flags anomalies, and routes high-confidence approvals straight through — with full audit and human-in-the-loop handoff.",
+    "results": [
+      "Turnaround dropped from 7 days to 18 hours",
+      "Straight-through processing reached 52% within 90 days",
+      "40% reduction in re-work"
+    ],
+    "metrics": [
+      { "value": "9×", "label": "Faster turnaround" },
+      { "value": "52%", "label": "Straight-through rate" },
+      { "value": "40%", "label": "Drop in re-work" }
+    ],
+    "technologies": ["Claude 3.5", "OpenAI Vision", "LangGraph", "FastAPI", "Postgres", "AWS"],
+    "tags": ["insurance", "document-ai", "claims", "automation"]
+  },
+  {
+    "id": "proj-004",
+    "title": "Real-Time Inventory Intelligence for Retail Chain",
+    "client": "BlueMart Retail",
+    "clientIndustry": "E-Commerce",
+    "year": 2024,
+    "duration": "6 months",
+    "teamSize": 7,
+    "challenge": "A 180-store retail chain suffered from 12% stockouts on top-moving SKUs and ₹14 Cr annual dead-stock writedowns due to poor demand forecasting.",
+    "solution": "We deployed a store-level demand forecasting system combining time-series ML with event-aware features (weather, local events, promotions), integrated with their SAP ERP for auto-replenishment.",
+    "results": [
+      "Stockouts reduced from 12% to 3.2%",
+      "Dead-stock writedowns down by 58%",
+      "Forecast accuracy of 91% at SKU-store-day grain"
+    ],
+    "metrics": [
+      { "value": "73%", "label": "Reduction in stockouts" },
+      { "value": "58%", "label": "Drop in dead-stock" },
+      { "value": "91%", "label": "Forecast accuracy" }
+    ],
+    "technologies": ["Python", "Prophet", "XGBoost", "Airflow", "Snowflake", "SAP Integration"],
+    "tags": ["retail", "forecasting", "ml", "supply-chain"]
+  }
+]

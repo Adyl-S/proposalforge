@@ -1,0 +1,54 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">12 — Governance</span>
+    <h2>Governance & Project Management</h2>
+    <p class="subtitle">Clear ownership, reporting rhythm, and escalation paths</p>
+  </div>
+
+  <p>{{governance.introduction}}</p>
+
+  <div class="governance-grid">
+    <div class="gov-card">
+      <h5>Steering Committee</h5>
+      <ul>
+        {{#governance.steeringCommittee}}
+        <li>{{.}}</li>
+        {{/governance.steeringCommittee}}
+      </ul>
+    </div>
+    <div class="gov-card">
+      <h5>Working Group</h5>
+      <ul>
+        {{#governance.workingGroup}}
+        <li>{{.}}</li>
+        {{/governance.workingGroup}}
+      </ul>
+    </div>
+    <div class="gov-card">
+      <h5>Reporting Cadence</h5>
+      <ul>
+        {{#governance.reportingCadence}}
+        <li><strong>{{frequency}}:</strong> {{what}}</li>
+        {{/governance.reportingCadence}}
+      </ul>
+    </div>
+    <div class="gov-card">
+      <h5>Change Management</h5>
+      <p style="font-size:9.5pt;color:var(--c-body);line-height:1.5;margin:0">{{governance.changeManagement}}</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:8mm">Escalation Path</h3>
+  <div class="escalation-flow">
+    {{#governance.escalationPath}}
+    <div class="escalation-node">{{.}}</div>
+    {{/governance.escalationPath}}
+  </div>
+
+  <h3 style="margin-top:6mm">Tools & Platforms</h3>
+  <div class="tools-row">
+    {{#governance.tools}}
+    <span class="tool-chip">{{.}}</span>
+    {{/governance.tools}}
+  </div>
+</section>

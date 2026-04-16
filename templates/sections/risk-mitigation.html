@@ -1,0 +1,32 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">11 — Risk Management</span>
+    <h2>Risk Mitigation</h2>
+    <p class="subtitle">Proactive identification and treatment of the most likely delivery risks</p>
+  </div>
+
+  <p>{{riskMitigation.introduction}}</p>
+
+  <table class="risk-table" style="margin-top:5mm">
+    <thead>
+      <tr>
+        <th style="width:14mm">ID</th>
+        <th>Risk</th>
+        <th style="width:20mm">Probability</th>
+        <th style="width:20mm">Impact</th>
+        <th>Mitigation Strategy</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#riskMitigation.risks}}
+      <tr>
+        <td><span class="risk-id">{{id}}</span></td>
+        <td><strong>{{title}}</strong><br/><span style="font-size:9pt;color:var(--c-muted)">{{description}}</span></td>
+        <td><span class="pill pill-{{probabilityClass}}">{{probability}}</span></td>
+        <td><span class="pill pill-{{impactClass}}">{{impact}}</span></td>
+        <td>{{mitigation}}</td>
+      </tr>
+      {{/riskMitigation.risks}}
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,33 @@
+<section class="cover-page">
+  <div class="cover-content">
+    <div class="cover-top">
+      <div class="cover-logo">
+        {{#company.logoDataUri}}<img src="{{company.logoDataUri}}" alt="{{company.name}}"/>{{/company.logoDataUri}}
+        {{^company.logoDataUri}}<span class="cover-logo-mark"></span> <span>{{company.name}}</span>{{/company.logoDataUri}}
+      </div>
+      <div class="cover-confidential">Confidential · v{{proposal.version}}</div>
+    </div>
+
+    <div class="cover-middle">
+      <div class="cover-eyebrow">Proposal for {{proposal.clientName}}</div>
+      <h1 class="cover-title">{{proposal.projectTitle}}</h1>
+      <p class="cover-subtitle">{{proposal.projectSubtitle}}</p>
+      <div class="cover-divider"></div>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-meta-block">
+        <h6>Prepared by</h6>
+        <p>{{company.name}}<br/><span style="font-weight:400;color:rgba(255,255,255,0.65);font-size:9.5pt">{{company.tagline}}</span></p>
+      </div>
+      <div class="cover-meta-block">
+        <h6>Prepared for</h6>
+        <p>{{proposal.clientName}}<br/><span style="font-weight:400;color:rgba(255,255,255,0.65);font-size:9.5pt">{{proposal.clientIndustry}}</span></p>
+      </div>
+      <div class="cover-meta-block">
+        <h6>Issued</h6>
+        <p>{{proposal.date}}<br/><span style="font-weight:400;color:rgba(255,255,255,0.65);font-size:9.5pt">Valid through {{proposal.validThrough}}</span></p>
+      </div>
+    </div>
+  </div>
+</section>

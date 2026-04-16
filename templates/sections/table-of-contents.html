@@ -1,0 +1,18 @@
+<section class="page toc-page">
+  <div class="section-header">
+    <span class="section-number">Contents</span>
+    <h2>Table of Contents</h2>
+    <p class="subtitle">A guided walkthrough of our proposed engagement</p>
+  </div>
+
+  <ul class="toc-list">
+    {{#toc}}
+    <li class="toc-item{{#major}} toc-major{{/major}}">
+      <span class="toc-number">{{number}}</span>
+      <span class="toc-title">{{title}}</span>
+      <span class="toc-leader"></span>
+      <span class="toc-page-num">{{page}}</span>
+    </li>
+    {{/toc}}
+  </ul>
+</section>

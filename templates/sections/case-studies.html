@@ -1,0 +1,56 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">09 — Proof</span>
+    <h2>Relevant Case Studies</h2>
+    <p class="subtitle">Outcomes we've delivered for clients with comparable challenges</p>
+  </div>
+
+  {{#caseStudies.items}}
+  <div class="case-study">
+    <div class="case-study-header">
+      <div class="case-study-title">
+        <h4>{{clientIndustry}}</h4>
+        <h3>{{title}}</h3>
+      </div>
+      <div class="case-study-year">{{year}} · {{duration}}</div>
+    </div>
+
+    <div class="case-study-content">
+      <div class="case-study-col">
+        <h6>Challenge</h6>
+        <p>{{challenge}}</p>
+      </div>
+      <div class="case-study-col">
+        <h6>Solution</h6>
+        <p>{{solution}}</p>
+      </div>
+      <div class="case-study-col">
+        <h6>Outcome</h6>
+        <p>{{outcome}}</p>
+      </div>
+    </div>
+
+    <div class="case-study-metrics">
+      {{#metrics}}
+      <div>
+        <span class="case-metric-value">{{value}}</span>
+        <span class="case-metric-label">{{label}}</span>
+      </div>
+      {{/metrics}}
+    </div>
+
+    <div class="case-study-tech">
+      {{#technologies}}
+      <span class="industry-tag">{{.}}</span>
+      {{/technologies}}
+    </div>
+
+    {{#testimonial}}
+    <div class="testimonial">
+      <p class="testimonial-quote">{{quote}}</p>
+      <p class="testimonial-author"><strong>{{author}}</strong> · {{authorTitle}}</p>
+    </div>
+    {{/testimonial}}
+  </div>
+  {{/caseStudies.items}}
+</section>

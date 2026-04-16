@@ -1,0 +1,27 @@
+<section class="page">
+  <div class="section-header">
+    <span class="section-number">08 — The Team</span>
+    <h2>Proposed Team</h2>
+    <p class="subtitle">A dedicated team of {{team.size}} specialists assembled for this engagement</p>
+  </div>
+
+  <p>{{team.introduction}}</p>
+
+  <div class="team-grid">
+    {{#team.members}}
+    <div class="team-card">
+      <div class="team-photo">
+        {{#photoDataUri}}<img src="{{photoDataUri}}" alt="{{name}}"/>{{/photoDataUri}}
+        {{^photoDataUri}}{{initials}}{{/photoDataUri}}
+      </div>
+      <div class="team-body">
+        <h5>{{name}}</h5>
+        <div class="team-title">{{title}}</div>
+        <div class="team-meta">{{yearsExperience}} yrs experience · {{expertiseSummary}}</div>
+        <p class="team-expertise">{{relevance}}</p>
+        <div class="team-role"><strong>Role on project:</strong> {{roleOnProject}}</div>
+      </div>
+    </div>
+    {{/team.members}}
+  </div>
+</section>

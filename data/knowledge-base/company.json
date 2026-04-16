@@ -1,0 +1,27 @@
+{
+  "name": "Phavella Technologies",
+  "tagline": "AI-Powered Digital Transformation",
+  "founded": 2022,
+  "headquarters": "Mumbai, India",
+  "teamSize": 25,
+  "projectsDelivered": 50,
+  "industriesServed": ["FinTech", "Healthcare", "E-Commerce", "Real Estate", "Education", "Insurance"],
+  "mission": "We build intelligent, production-grade AI systems that move enterprise KPIs — not demos, not prototypes, real revenue-bearing workloads.",
+  "certifications": ["AWS Advanced Partner", "ISO 27001:2022", "SOC 2 Type II", "Google Cloud Partner"],
+  "coreCompetencies": [
+    { "name": "AI & Machine Learning", "description": "Production-grade ML pipelines, NLP, computer vision, and generative AI solutions deployed at enterprise scale." },
+    { "name": "Conversational & Voice AI", "description": "Sub-second latency voice agents, multilingual IVR, and omnichannel chatbots built on LiveKit, Deepgram, and proprietary orchestration." },
+    { "name": "Full-Stack Engineering", "description": "Next.js, FastAPI, React Native — modern web and mobile applications built for reliability and speed." },
+    { "name": "Cloud & Platform", "description": "AWS, GCP, Azure — scalable, cost-optimized, SOC 2 compliant infrastructure with 99.95% uptime SLAs." },
+    { "name": "Data Engineering", "description": "Real-time pipelines, lakehouse architectures, and analytics systems powering live business decisions." }
+  ],
+  "brandColors": {
+    "primary": "#0F172A",
+    "secondary": "#1E293B",
+    "accent": "#3B82F6"
+  },
+  "signatoryName": "Adil Sheikh",
+  "signatoryTitle": "Founder & CEO",
+  "website": "https://phavella.com",
+  "email": "hello@phavella.com"
+}
