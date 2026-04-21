@@ -19,9 +19,9 @@ ${formatCompany(company)}
 
 === RETURN THIS JSON SHAPE ===
 {
-  "openingHook": "2-3 punchy sentences. Open by addressing the client's strategic inflection point — NOT the project itself. Use a contrast (e.g., 'the firms that win the next decade will not be X, they will be Y'). Add one concrete data point about the industry moment.",
-  "understanding": "3-4 sentences demonstrating deep understanding of the client's situation. Include at least two specific operational metrics or patterns. Reference the client's scale (customers, volumes, channels) and the compounding frictions they face.",
-  "solutionBullets": ["Three bullet points, each 2 sentences long. Each bullet describes one pillar of the proposed solution AND includes a concrete capability plus quantified outcome."],
+  "openingHook": "2 punchy sentences. Open by addressing the client's strategic inflection point — NOT the project itself. Use a contrast (e.g., 'the firms that win the next decade will not be X, they will be Y').",
+  "understanding": "2-3 sentences demonstrating deep understanding of the client's situation. Include at least one specific operational metric or pattern. Reference the client's scale and the compounding frictions they face.",
+  "solutionBullets": ["EXACTLY 3 bullet points, each 1-2 sentences. Each bullet describes one pillar of the proposed solution with a concrete capability or quantified outcome."],
   "expectedOutcomes": [
     { "metric": "Short label (2-3 words, Title Case)", "value": "Hero number (e.g. '45%' or '4.2x' or '$2M')", "description": "short phrase completing the value context" },
     { "metric": "...", "value": "...", "description": "..." },
@@ -29,7 +29,7 @@ ${formatCompany(company)}
   ],
   "investmentRange": "Range in the client's currency with tasteful formatting (e.g. 'USD 180,000 — 240,000' or '₹2.4 Cr — ₹3.1 Cr')",
   "pricingModel": "One short label matching the client's pricing preference (e.g. 'Fixed Price · Milestone-Linked')",
-  "closingStatement": "2-3 sentences on why THIS specific company is the right partner, grounded in their actual certifications/industries served. Name specific capabilities that map to this engagement. Avoid generic claims."
+  "closingStatement": "1-2 sentences on why THIS specific company is the right partner, grounded in their actual certifications/industries served. Avoid generic claims."
 }
 
 Return ONLY the JSON object.`,

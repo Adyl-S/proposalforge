@@ -56,7 +56,7 @@
 /* ---------- Page Rules (A4 — Puppeteer handles margins) ---------- */
 @page {
   size: A4;
-  margin: 22mm 18mm 24mm 18mm;
+  margin: 15mm 16mm 18mm 16mm;
 }
 @page :first {
   margin: 0;
@@ -97,8 +97,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 { font-size: 28pt; font-weight: 700; letter-spacing: -0.03em; }
-h2 { font-size: 20pt; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 6mm; }
-h3 { font-size: 14pt; font-weight: 600; color: var(--c-secondary); margin-bottom: 3mm; }
+h2 { font-size: 20pt; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 4mm; }
+h3 { font-size: 14pt; font-weight: 600; color: var(--c-secondary); margin-bottom: 2.5mm; margin-top: 4mm; }
 h4 {
   font-size: 9pt;
   font-weight: 600;
@@ -141,22 +141,22 @@ ul li::marker { color: var(--c-accent); }
   color: var(--c-accent);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 3mm;
+  margin-bottom: 2mm;
   display: block;
 }
 
 .section-header {
-  margin-bottom: 10mm;
-  padding-bottom: 5mm;
+  margin-bottom: 4mm;
+  padding-bottom: 2.5mm;
   border-bottom: 1px solid var(--c-border);
 }
 
 .section-header h2 {
-  margin-bottom: 2mm;
+  margin-bottom: 1.5mm;
 }
 
 .section-header .subtitle {
-  font-size: 10.5pt;
+  font-size: 10pt;
   color: var(--c-muted);
   font-weight: 400;
   letter-spacing: -0.005em;
@@ -472,7 +472,7 @@ ul li::marker { color: var(--c-accent); }
 
 .bullets-enhanced li {
   position: relative;
-  padding: 3mm 0 3mm 9mm;
+  padding: 2mm 0 2mm 9mm;
   border-bottom: 1px solid var(--c-border);
   font-size: 10.5pt;
   color: var(--c-secondary);
@@ -1010,8 +1010,8 @@ ul li::marker { color: var(--c-accent); }
    CASE STUDIES
    ============================================================ */
 .case-study {
-  margin-bottom: 8mm;
-  padding: 7mm;
+  margin-bottom: 5mm;
+  padding: 5mm 6mm;
   background: #FFFFFF;
   border: 1px solid var(--c-border);
   border-left: 4px solid var(--c-accent);
@@ -1023,8 +1023,8 @@ ul li::marker { color: var(--c-accent); }
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 5mm;
-  padding-bottom: 4mm;
+  margin-bottom: 3mm;
+  padding-bottom: 3mm;
   border-bottom: 1px solid var(--c-border);
 }
 

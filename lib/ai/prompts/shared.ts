@@ -7,7 +7,7 @@ Every paragraph must answer "so what?" for a CXO reader.
 TONE: Confident, data-driven, specific, outcome-oriented. No buzzword salad, no vague promises.
 FORMAT: Return ONLY a JSON object matching the requested schema. No prose outside JSON, no markdown fences, no preamble.
 STYLE: Prefer concrete numbers and named artifacts over abstract claims. Use en-dashes (—) not hyphens for parenthetical asides.
-LENGTH: Generate rich, substantive content that fills a full A4 page per section. The target PDF is 16–22 pages. Each section must be dense with specifics — real metrics, real system names, real methodologies. Hit the upper bound of the requested item counts, write the maximum sentence count for each field, and err on the side of MORE detail. Never return placeholder or truncated content. Thin output is a failure.`;
+LENGTH: Write substantive, specific content — real metrics, real system names, real methodologies. Target PDF length is 18–22 pages TOTAL, so each section should fill one A4 page (long sections may span two — that is fine). Respect the requested item counts exactly; do not exceed them. Do not pad. Every sentence must add a fact, a number, or a decision. Target the middle of any requested range, not the top.`;
 
 export function formatRequirements(input: ProposalInput): string {
   const parts: string[] = [];

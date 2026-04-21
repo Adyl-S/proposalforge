@@ -129,8 +129,8 @@ function selectTeamMembers(
     }
     if (out.length > 0) return out;
   }
-  // Fallback — first 5 members
-  return members.slice(0, 5).map((m) => ({
+  // Fallback — first 4 members (keeps team page compact)
+  return members.slice(0, 4).map((m) => ({
     member: m,
     roleOnProject: `${m.title} on the engagement.`,
     relevance: m.bio,
@@ -142,18 +142,21 @@ function selectCaseStudies(
   aiSelections: { id: string; reason: string }[] | undefined,
   explicitIds?: string[],
 ): KBProject[] {
+  // Cap to 2 case studies — the third tends to push the PDF over 25 pages.
+  const CAP = 2;
   if (explicitIds?.length) {
-    return explicitIds.map((id) => projects.find((p) => p.id === id)).filter((p): p is KBProject => !!p);
+    return explicitIds.map((id) => projects.find((p) => p.id === id)).filter((p): p is KBProject => !!p).slice(0, CAP);
   }
   if (aiSelections?.length) {
     const out: KBProject[] = [];
     for (const sel of aiSelections) {
       const p = projects.find((x) => x.id === sel.id);
       if (p) out.push(p);
+      if (out.length >= CAP) break;
     }
     if (out.length > 0) return out;
   }
-  return projects.slice(0, 3);
+  return projects.slice(0, CAP);
 }
 
 // ────────────────────────────────────────────────────────────
