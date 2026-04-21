@@ -15,13 +15,13 @@ Design the delivery approach. Tailor the phase count and durations to fit the pr
 === RETURN THIS JSON SHAPE ===
 {
   "approach": "Short label (e.g. 'Agile with Regulatory Gates', 'Waterfall-Phased', 'Hybrid with Continuous Delivery')",
-  "summary": "2-3 sentences describing the delivery rhythm, sprint cadence, and review gates.",
+  "summary": "3-4 sentences describing the delivery rhythm, sprint cadence, review gates, and how this approach de-risks the engagement for the client.",
   "phases": [
-    { "num": 1, "name": "Phase name", "description": "1-2 sentences of what happens in this phase and what comes out of it.", "duration": "X weeks" }
-    // 4-5 phases total, durations summing close to the client's timeline
+    { "num": 1, "name": "Phase name", "description": "2-3 sentences of what happens in this phase, the key artifacts produced, and the exit criteria.", "duration": "X weeks" }
+    // EXACTLY 5 phases. Durations should sum close to the client's timeline. Use these canonical phase names: 1) Discovery & Design, 2) Foundation Build, 3) Core Implementation, 4) Integration & QA, 5) UAT & Rollout.
   ],
-  "qa": ["3-4 specific QA practices — each a single clear sentence"],
-  "communication": ["3-4 specific communication touchpoints with cadence"]
+  "qa": ["4-5 specific QA practices — each a single clear sentence naming the artifact, cadence, or tool"],
+  "communication": ["4-5 specific communication touchpoints with cadence and the audience"]
 }
 
 Return ONLY the JSON.`,

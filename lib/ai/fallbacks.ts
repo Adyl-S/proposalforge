@@ -46,30 +46,37 @@ export function fallbackProblemStatement(input: ProposalInput) {
 }
 
 export function fallbackProposedSolution(input: ProposalInput) {
+  const baseStack = ['TypeScript', 'Next.js', 'Python', 'FastAPI', 'PostgreSQL', 'Redis', 'pgvector', 'AWS', 'Terraform', 'Datadog', 'PagerDuty', 'Vault'];
+  const preferred = input.preferredTechnologies ?? [];
+  const merged = [...preferred];
+  for (const t of baseStack) if (merged.length < 12 && !merged.includes(t)) merged.push(t);
   return {
     overview:
-      'We propose a three-layer architecture: (1) a capability layer exposing AI-powered services via clean APIs, (2) a unified context and data layer serving both AI and human operators, and (3) a governance layer providing audit trails, decision logging, and compliance reporting. All layers deploy into your existing cloud footprint.',
+      'We propose a three-layer architecture built for a regulated enterprise: (1) a capability layer exposing AI-powered services via clean, versioned APIs, (2) a unified context and data layer serving both AI and human operators from a single source of truth, and (3) a governance layer providing immutable audit trails, decision logging, and regulator-ready compliance reporting. All three layers deploy into your existing cloud footprint with no data leaving your sovereign boundary. The AI operates against a streaming context proxy rather than copies of source data, minimising blast radius and simplifying data residency.',
     components: [
-      { name: 'Intelligence Layer', description: 'LLM-driven orchestration, retrieval, and tool execution — the decision core of the platform.' },
-      { name: 'Unified Context Service', description: 'Real-time aggregation of customer and operational state from source systems into a single, consistent object.' },
-      { name: 'Operator Console', description: 'Modern web UI giving operators full visibility into AI decisions and one-click takeover when needed.' },
-      { name: 'Compliance & Audit', description: 'Immutable logging, bias monitoring, and regulator-ready report export.' },
-      { name: 'Observability & SRE', description: 'Datadog-grade monitoring, alerting, and runbooks for 24×7 operations.' },
+      { name: 'Intelligence Layer', description: 'LLM-driven orchestration, retrieval over indexed policy and knowledge, and controlled tool execution. Claude-based primary with deterministic guardrails on regulated actions — the decision core of the platform.' },
+      { name: 'Unified Context Service', description: 'Real-time aggregation of customer and operational state from source systems into a single, consistent object accessible in under 120ms. Event-driven with change-data-capture streaming into a shared cache for sub-second context building.' },
+      { name: 'Operator Console', description: 'Modern web UI giving operators full visibility into AI decisions, suggested next-best-actions, and one-click takeover when escalation is required. Integrated transcript, action history, and case-management hooks reduce agent ramp time by ~40%.' },
+      { name: 'Compliance & Audit', description: 'Immutable decision logging, bias monitoring, consent flow capture, and regulator-ready report export. Control matrix is mapped to the client\'s applicable regulations with automated evidence collection.' },
+      { name: 'Observability & SRE', description: 'Datadog-grade monitoring, structured logging, distributed tracing, synthetic probes, and 24×7 runbooks. Per-use-case SLOs with auto-paging integrated to PagerDuty and the client\'s existing incident stack.' },
+      { name: 'Continuous Eval Harness', description: 'Weekly offline evaluations against a golden dataset, topic-drift detection, and automated regression gates before any model or prompt change hits production.' },
     ],
     integrations: [
-      'Client source-of-truth systems — for context and state',
-      'Identity & auth systems — OTP, SSO, step-up authentication',
-      'Analytics / BI — event export for downstream reporting',
-      'Communications systems — telephony, email, chat channels',
-      'Security & audit — SIEM / log sinks',
+      'Client core source-of-truth systems — real-time state retrieval via REST/gRPC',
+      'Identity & auth — SSO, OTP, step-up authentication, device attestation',
+      'Analytics / BI — event stream export via Kafka / Kinesis for downstream warehousing',
+      'Communications — SIP telephony, email gateways, chat channels via Webhooks',
+      'CRM / Ticketing — bi-directional sync with Salesforce, Zendesk, or ServiceNow',
+      'Security & audit — SIEM log shipping, KMS-backed secret rotation',
+      'Payments & billing — Stripe / native payment rails for commerce workflows',
+      'Knowledge management — Confluence / internal wikis indexed for retrieval',
     ],
-    techStack: input.preferredTechnologies?.length
-      ? input.preferredTechnologies
-      : ['TypeScript', 'Next.js', 'Python', 'FastAPI', 'PostgreSQL', 'Redis', 'AWS', 'Terraform', 'Datadog'],
+    techStack: merged.slice(0, 12),
     innovations: [
-      'Zero-copy context architecture — data never leaves your VPC; the AI operates on a streaming proxy.',
-      'Deterministic guardrails — the AI cannot execute regulated actions without explicit verification.',
-      'Continuous eval harness — every release is scored against golden datasets before promotion.',
+      'Zero-copy context architecture — data never leaves your VPC; the AI operates on a streaming proxy with end-to-end encryption in motion.',
+      'Deterministic guardrails — the AI physically cannot execute regulated actions without explicit multi-factor verification, enforced at the tool layer rather than in the prompt.',
+      'Continuous eval harness — every release is scored against a golden evaluation set before promotion, gating any drift beyond configured thresholds.',
+      'Per-use-case observability — every AI decision is logged with full reasoning trace, enabling root-cause analysis for any production incident within minutes.',
     ],
   };
 }
@@ -111,20 +118,25 @@ export function fallbackMethodology(input: ProposalInput) {
 export function fallbackDeliverables(phaseNames: string[]) {
   return {
     items: [
-      { phase: phaseNames[0] ?? 'Phase 1', name: 'Solution Blueprint', description: 'Complete architecture, integrations, and compliance mapping.', acceptance: 'Signed off by client architecture review board.' },
-      { phase: phaseNames[0] ?? 'Phase 1', name: 'Project Plan & Risk Register', description: 'Detailed plan with resource plan, risks, and mitigation.', acceptance: 'Approved by steering committee.' },
-      { phase: phaseNames[1] ?? 'Phase 2', name: 'Core Services Live', description: 'Context and integration services deployed to staging.', acceptance: 'All integration SLAs met; load-tested to 3× peak.' },
-      { phase: phaseNames[1] ?? 'Phase 2', name: 'Identity & Auth', description: 'SSO, step-up auth, and audit logging in place.', acceptance: 'Successful end-to-end auth flow with audit trail.' },
-      { phase: phaseNames[2] ?? 'Phase 3', name: 'Primary Use Cases', description: 'Top use cases delivered and shadow-tested in production.', acceptance: 'Shadow metrics meet acceptance thresholds.' },
-      { phase: phaseNames[2] ?? 'Phase 3', name: 'Operator Console', description: 'Full operator UI with takeover and escalation.', acceptance: 'Operators trained and signed off.' },
-      { phase: phaseNames[3] ?? 'Phase 4', name: 'Security & Compliance Pack', description: 'Pen-test, bias audit, compliance dossier.', acceptance: 'No criticals; regulator walkthrough complete.' },
-      { phase: phaseNames[4] ?? 'Phase 5', name: 'Production Rollout', description: 'Full production deployment with runbooks and on-call.', acceptance: '100% eligible traffic live; 30-day SLA met.' },
+      { phase: phaseNames[0] ?? 'Phase 1', name: 'Solution Blueprint', description: 'Complete architecture diagram, integration map, and compliance control matrix covering all in-scope systems and data flows.', acceptance: 'Signed off by the client architecture review board with no critical findings.' },
+      { phase: phaseNames[0] ?? 'Phase 1', name: 'Project Plan & Risk Register', description: 'Detailed delivery plan with resource loading, risk register, mitigation plan, and RACI matrix.', acceptance: 'Approved by the steering committee and published in the shared PMO workspace.' },
+      { phase: phaseNames[0] ?? 'Phase 1', name: 'Data & Integration Discovery', description: 'Data profiling of all source systems, interface specifications, and integration sequencing plan.', acceptance: 'Data-quality baseline documented; all integration owners confirmed.' },
+      { phase: phaseNames[1] ?? 'Phase 2', name: 'Core Services Live', description: 'Context and integration services deployed to staging environment with full observability.', acceptance: 'All integration SLAs met; load-tested to 3× peak expected traffic.' },
+      { phase: phaseNames[1] ?? 'Phase 2', name: 'Identity & Auth', description: 'SSO, step-up authentication, session management, and immutable audit logging in place.', acceptance: 'End-to-end auth flow demonstrated with full audit trail review by security.' },
+      { phase: phaseNames[2] ?? 'Phase 3', name: 'Primary Use Cases', description: 'Top priority use cases delivered and shadow-tested in production against the existing baseline.', acceptance: 'Shadow-mode metrics meet or exceed acceptance thresholds for 10 business days.' },
+      { phase: phaseNames[2] ?? 'Phase 3', name: 'Operator Console', description: 'Full operator UI with takeover, escalation, transcript review, and next-best-action suggestions.', acceptance: 'Operator user-acceptance testing complete; training sign-off from team leads.' },
+      { phase: phaseNames[2] ?? 'Phase 3', name: 'Evaluation Harness', description: 'Continuous evaluation pipeline with golden dataset, drift detection, and automated regression gates.', acceptance: 'Weekly eval dashboard operational; baseline scorecards archived.' },
+      { phase: phaseNames[3] ?? 'Phase 4', name: 'Security & Compliance Pack', description: 'External penetration test, bias audit, data protection impact assessment, and regulator-ready dossier.', acceptance: 'No critical findings; regulator walkthrough meeting completed.' },
+      { phase: phaseNames[3] ?? 'Phase 4', name: 'Performance & Resilience Pack', description: 'Multi-region failover test, chaos engineering runs, and latency optimisation report.', acceptance: 'All per-use-case SLOs held during chaos runs; RTO/RPO documented.' },
+      { phase: phaseNames[4] ?? 'Phase 5', name: 'Production Rollout', description: 'Full production deployment with runbooks, on-call rotation, and incident playbooks.', acceptance: '100% of eligible traffic live; 30-day steady-state SLA achieved.' },
+      { phase: phaseNames[4] ?? 'Phase 5', name: 'Knowledge Transfer & Handover', description: 'Operations handover, architecture walkthrough, and 30-day hypercare transition to BAU teams.', acceptance: 'Client operations team signs off on runbooks and incident drills.' },
     ],
     milestones: [
       { name: 'Design Sign-off', target: 'Week 4' },
       { name: 'Foundation Acceptance', target: 'Week 9' },
-      { name: 'Alpha Release', target: 'Week 14' },
-      { name: 'Compliance Sign-off', target: 'Week 18' },
+      { name: 'Alpha Release', target: 'Week 13' },
+      { name: 'Beta Launch', target: 'Week 17' },
+      { name: 'Compliance Sign-off', target: 'Week 19' },
       { name: 'UAT Complete', target: 'Week 22' },
       { name: 'Production Go-Live', target: 'Week 24' },
     ],
@@ -181,15 +193,16 @@ export function fallbackBudget(input: ProposalInput, phaseNames: string[]) {
 export function fallbackRiskMitigation() {
   return {
     introduction:
-      'We have run a structured risk assessment across delivery, technology, regulatory, adoption, and vendor axes. The following are the top risks we actively manage with named mitigations.',
+      'We run a structured risk assessment across delivery, technology, regulatory, adoption, data quality, vendor, and security axes. Risks are reviewed weekly at the working group, escalated to the steering committee for treatment decisions, and tracked with named owners in a shared risk register. The following are the top risks we actively manage with specific mitigations, artifacts, and review cadences.',
     risks: [
-      { id: 'R-01', title: 'Integration delays with legacy systems', description: 'Dependencies on client IT may create unplanned wait states.', probability: 'Medium', impact: 'High', mitigation: 'Early integration spike in Week 1; named client counterpart; contingency week in Phase 2.' },
-      { id: 'R-02', title: 'Data quality in source systems', description: 'Inconsistent or incomplete records can degrade downstream accuracy.', probability: 'High', impact: 'Medium', mitigation: 'Data profiling in Week 2; automated reconciliation layer; SLAs on source quality.' },
-      { id: 'R-03', title: 'Regulatory interpretation change', description: 'Guidance in this domain continues to evolve.', probability: 'Low', impact: 'High', mitigation: 'Quarterly regulatory review; modular architecture; dedicated compliance liaison.' },
-      { id: 'R-04', title: 'Operator adoption & change resistance', description: 'End users may resist new tooling or workflows.', probability: 'Medium', impact: 'Medium', mitigation: 'Co-design from Week 2; champion program; phased rollout with feedback loops.' },
-      { id: 'R-05', title: 'Latency & scale regressions', description: 'Performance at production load may differ from staging.', probability: 'Medium', impact: 'Medium', mitigation: 'Weekly 3× peak load tests; autoscaling; per-use-case SLOs.' },
-      { id: 'R-06', title: 'Third-party vendor incident', description: 'Upstream outage could cascade to the platform.', probability: 'Low', impact: 'High', mitigation: 'Dual-vendor fallback chain; graceful degradation path; clear runbooks.' },
-      { id: 'R-07', title: 'Scope drift', description: 'Mid-project scope change can jeopardize timeline and cost.', probability: 'Medium', impact: 'Medium', mitigation: 'Formal CR process; steering committee approval; impact-assessment template.' },
+      { id: 'R-01', title: 'Integration delays with legacy systems', description: 'Dependencies on client IT teams for legacy system access, credentials, or schema changes may create unplanned wait states in Phase 2.', probability: 'Medium', impact: 'High', mitigation: 'Early integration spike in Week 1; named client counterpart with SLA on response; contingency week baked into Phase 2 plan. Reviewed weekly at working group.' },
+      { id: 'R-02', title: 'Data quality in source systems', description: 'Inconsistent, duplicate, or incomplete records in source systems can degrade downstream AI accuracy and operator trust.', probability: 'High', impact: 'Medium', mitigation: 'Data profiling sweep in Week 2; automated reconciliation layer with alerts; quality SLAs negotiated with source-system owners. Monthly data-quality scorecard review.' },
+      { id: 'R-03', title: 'Regulatory interpretation change', description: 'Guidance in this domain continues to evolve, particularly around generative AI and data handling.', probability: 'Low', impact: 'High', mitigation: 'Quarterly regulatory review with legal counsel; modular architecture allowing rapid policy swaps; dedicated compliance liaison on working group.' },
+      { id: 'R-04', title: 'Operator adoption & change resistance', description: 'End users may resist new tooling, shifts in workflow, or perceived job-security concerns.', probability: 'Medium', impact: 'Medium', mitigation: 'Co-design sessions from Week 2; champion program across teams; phased rollout with feedback loops; explicit incentive alignment with client HR.' },
+      { id: 'R-05', title: 'Latency & scale regressions', description: 'Performance at production load may diverge from staging, especially during peak traffic windows.', probability: 'Medium', impact: 'Medium', mitigation: 'Weekly 3× peak load tests against production-equivalent infra; autoscaling + regional failover; per-use-case SLOs enforced as release gates.' },
+      { id: 'R-06', title: 'Third-party vendor incident', description: 'Outage or rate-limiting at a critical upstream vendor (AI, telephony, payments) could cascade to platform availability.', probability: 'Low', impact: 'High', mitigation: 'Dual-vendor fallback chain for every external dependency; graceful degradation path to human fallback; vendor-specific runbooks and synthetic probes.' },
+      { id: 'R-07', title: 'Scope drift', description: 'Mid-project scope changes — new use cases, new integrations — can jeopardise timeline, cost, and quality if not governed.', probability: 'Medium', impact: 'Medium', mitigation: 'Formal change-request process with impact-assessment template; steering committee approval required; SOW addendum for any scope delta.' },
+      { id: 'R-08', title: 'Security or data incident', description: 'Any security incident during or post-deployment carries regulatory, reputational, and operational cost.', probability: 'Low', impact: 'High', mitigation: 'Threat-modeled architecture from Day 1; external penetration test in Phase 4; immutable audit logging; 24×7 incident response runbooks with documented RTO/RPO.' },
     ],
   };
 }

@@ -56,7 +56,7 @@ export async function generateProposalPdf(opts: GeneratePdfOptions): Promise<Buf
       displayHeaderFooter: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
       headerTemplate: `<div style="font-size:7.5pt;color:#94A3B8;width:100%;text-align:right;padding:4mm 18mm 0 0;font-family:Inter,Arial,sans-serif;letter-spacing:0.08em;text-transform:uppercase;"><span class="pageNumber"></span> · Confidential</div>`,
-      footerTemplate: `<div style="font-size:7.5pt;color:#64748B;width:100%;padding:0 18mm 4mm 18mm;font-family:Inter,Arial,sans-serif;display:flex;justify-content:space-between;"><span>ProposalForge</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+      footerTemplate: `<div style="font-size:7.5pt;color:#64748B;width:100%;padding:0 18mm 4mm 18mm;font-family:Inter,Arial,sans-serif;display:flex;justify-content:space-between;"><span>Proposal Generator</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
     };
 
     if (opts.outputPath) {

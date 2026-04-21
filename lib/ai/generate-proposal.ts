@@ -58,6 +58,35 @@ async function runSection<T>(s: AiSection<T>, onProgress?: ProgressCb): Promise<
   }
 }
 
+/**
+ * Deep-merge AI output over fallback defaults so every template field has a value.
+ * Missing/empty keys from the AI are filled from the fallback. Non-empty AI values
+ * are preserved. Arrays are kept as-is (we assume AI returned a full list if any).
+ */
+function mergeWithFallback<T extends Record<string, unknown>>(ai: unknown, fallback: T): T {
+  if (!ai || typeof ai !== 'object' || Array.isArray(ai)) return fallback;
+  const aiObj = ai as Record<string, unknown>;
+  const out: Record<string, unknown> = { ...fallback };
+  for (const key of Object.keys(fallback)) {
+    const aiVal = aiObj[key];
+    const fbVal = (fallback as Record<string, unknown>)[key];
+    if (aiVal === undefined || aiVal === null) continue;
+    if (typeof aiVal === 'string' && aiVal.trim() === '') continue;
+    if (Array.isArray(aiVal)) {
+      out[key] = aiVal.length > 0 ? aiVal : fbVal;
+    } else if (typeof aiVal === 'object' && typeof fbVal === 'object' && fbVal !== null && !Array.isArray(fbVal)) {
+      out[key] = mergeWithFallback(aiVal, fbVal as Record<string, unknown>);
+    } else {
+      out[key] = aiVal;
+    }
+  }
+  // Keep any extra AI keys the fallback doesn't know about
+  for (const key of Object.keys(aiObj)) {
+    if (!(key in out)) out[key] = aiObj[key];
+  }
+  return out as T;
+}
+
 const PROB_CLASS = (s: string): 'high' | 'med' | 'low' => {
   const v = s.toLowerCase();
   if (v.startsWith('h')) return 'high';
@@ -147,10 +176,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'executiveSummary',
-          run: async () =>
-            useAi
-              ? ((await generate(executiveSummaryPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackExecutiveSummary(input, companySnapshot)
-              : fb.fallbackExecutiveSummary(input, companySnapshot),
+          run: async () => {
+            const fallback = fb.fallbackExecutiveSummary(input, companySnapshot);
+            if (!useAi) return fallback;
+            const r = await generate(executiveSummaryPrompt(input, companySnapshot));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackExecutiveSummary(input, companySnapshot),
         },
         onProgress,
@@ -158,10 +189,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'problemStatement',
-          run: async () =>
-            useAi
-              ? ((await generate(problemStatementPrompt(input))).parsed as any) ?? fb.fallbackProblemStatement(input)
-              : fb.fallbackProblemStatement(input),
+          run: async () => {
+            const fallback = fb.fallbackProblemStatement(input);
+            if (!useAi) return fallback;
+            const r = await generate(problemStatementPrompt(input));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackProblemStatement(input),
         },
         onProgress,
@@ -169,10 +202,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'proposedSolution',
-          run: async () =>
-            useAi
-              ? ((await generate(proposedSolutionPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackProposedSolution(input)
-              : fb.fallbackProposedSolution(input),
+          run: async () => {
+            const fallback = fb.fallbackProposedSolution(input);
+            if (!useAi) return fallback;
+            const r = await generate(proposedSolutionPrompt(input, companySnapshot));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackProposedSolution(input),
         },
         onProgress,
@@ -180,10 +215,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'methodology',
-          run: async () =>
-            useAi
-              ? ((await generate(methodologyPrompt(input))).parsed as any) ?? fb.fallbackMethodology(input)
-              : fb.fallbackMethodology(input),
+          run: async () => {
+            const fallback = fb.fallbackMethodology(input);
+            if (!useAi) return fallback;
+            const r = await generate(methodologyPrompt(input));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackMethodology(input),
         },
         onProgress,
@@ -191,10 +228,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'deliverables',
-          run: async () =>
-            useAi
-              ? ((await generate(deliverablesPrompt(input, phaseNamesDefault))).parsed as any) ?? fb.fallbackDeliverables(phaseNamesDefault)
-              : fb.fallbackDeliverables(phaseNamesDefault),
+          run: async () => {
+            const fallback = fb.fallbackDeliverables(phaseNamesDefault);
+            if (!useAi) return fallback;
+            const r = await generate(deliverablesPrompt(input, phaseNamesDefault));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackDeliverables(phaseNamesDefault),
         },
         onProgress,
@@ -202,10 +241,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'timeline',
-          run: async () =>
-            useAi
-              ? ((await generate(timelinePrompt(input))).parsed as any) ?? fb.fallbackTimeline(input)
-              : fb.fallbackTimeline(input),
+          run: async () => {
+            const fallback = fb.fallbackTimeline(input);
+            if (!useAi) return fallback;
+            const r = await generate(timelinePrompt(input));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackTimeline(input),
         },
         onProgress,
@@ -213,10 +254,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'budget',
-          run: async () =>
-            useAi
-              ? ((await generate(budgetPrompt(input, phaseNamesDefault))).parsed as any) ?? fb.fallbackBudget(input, phaseNamesDefault)
-              : fb.fallbackBudget(input, phaseNamesDefault),
+          run: async () => {
+            const fallback = fb.fallbackBudget(input, phaseNamesDefault);
+            if (!useAi) return fallback;
+            const r = await generate(budgetPrompt(input, phaseNamesDefault));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackBudget(input, phaseNamesDefault),
         },
         onProgress,
@@ -224,10 +267,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'riskMitigation',
-          run: async () =>
-            useAi
-              ? ((await generate(riskMitigationPrompt(input))).parsed as any) ?? fb.fallbackRiskMitigation()
-              : fb.fallbackRiskMitigation(),
+          run: async () => {
+            const fallback = fb.fallbackRiskMitigation();
+            if (!useAi) return fallback;
+            const r = await generate(riskMitigationPrompt(input));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackRiskMitigation(),
         },
         onProgress,
@@ -235,10 +280,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'governance',
-          run: async () =>
-            useAi
-              ? ((await generate(governancePrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackGovernance(companySnapshot)
-              : fb.fallbackGovernance(companySnapshot),
+          run: async () => {
+            const fallback = fb.fallbackGovernance(companySnapshot);
+            if (!useAi) return fallback;
+            const r = await generate(governancePrompt(input, companySnapshot));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackGovernance(companySnapshot),
         },
         onProgress,
@@ -246,10 +293,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'whyUs',
-          run: async () =>
-            useAi
-              ? ((await generate(whyUsPrompt(input, companySnapshot))).parsed as any) ?? fb.fallbackWhyUs(companySnapshot)
-              : fb.fallbackWhyUs(companySnapshot),
+          run: async () => {
+            const fallback = fb.fallbackWhyUs(companySnapshot);
+            if (!useAi) return fallback;
+            const r = await generate(whyUsPrompt(input, companySnapshot));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackWhyUs(companySnapshot),
         },
         onProgress,
@@ -257,10 +306,12 @@ export async function generateProposalData(
       runSection(
         {
           key: 'terms',
-          run: async () =>
-            useAi
-              ? ((await generate(termsPrompt(input))).parsed as any) ?? fb.fallbackTerms()
-              : fb.fallbackTerms(),
+          run: async () => {
+            const fallback = fb.fallbackTerms();
+            if (!useAi) return fallback;
+            const r = await generate(termsPrompt(input));
+            return mergeWithFallback(r.parsed, fallback);
+          },
           fallback: () => fb.fallbackTerms(),
         },
         onProgress,
@@ -292,7 +343,6 @@ export async function generateProposalData(
     ]);
 
   // ────── Build derived objects ──────
-  const phaseNamesForBudget = methRaw?.phases?.map((p: any) => p.name) ?? phaseNamesDefault;
 
   // Timeline chart
   const timelineChart = renderTimelineGantt(

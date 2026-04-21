@@ -1,5 +1,5 @@
 /* ============================================================
-   ProposalForge — Enterprise Proposal PDF Stylesheet
+   Proposal Generator — Enterprise Proposal PDF Stylesheet
    Target: Accenture / McKinsey / Deloitte production quality
    Render engine: Puppeteer (headless Chrome) @ A4
    ============================================================ */
@@ -125,7 +125,9 @@ ul li::marker { color: var(--c-accent); }
 /* ---------- Layout Primitives ---------- */
 .page {
   page-break-after: always;
-  page-break-inside: avoid;
+  /* Intentionally NOT "page-break-inside: avoid" — long sections (deliverables table,
+     case studies, terms) need to flow across pages without leaving blank bottom space. */
+  page-break-inside: auto;
   position: relative;
 }
 .page:last-child { page-break-after: auto; }
@@ -781,7 +783,8 @@ ul li::marker { color: var(--c-accent); }
    ============================================================ */
 .phases-flow {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* minmax(32mm) lets 5 phase-cards sit on a single row at A4 (inner width ~174mm). */
+  grid-template-columns: repeat(auto-fit, minmax(32mm, 1fr));
   gap: 3mm;
   margin: 6mm 0;
   position: relative;

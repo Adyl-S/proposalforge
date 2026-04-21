@@ -21,14 +21,14 @@ Design the solution architecture. Think in terms of layers/components, not featu
 
 === RETURN THIS JSON SHAPE ===
 {
-  "overview": "3-4 sentences describing the proposed architecture in layers or tiers. Use an analogy or concrete mental model.",
+  "overview": "4-5 sentences describing the proposed architecture in layers or tiers. Use an analogy or concrete mental model. Reference specific data flows and boundaries.",
   "components": [
-    { "name": "4-6 word component name", "description": "1-2 sentences on what it does and why it's included" }
-    // Include 4-6 components
+    { "name": "4-6 word component name", "description": "2-3 sentences on what it does, the core technologies inside it, and why it is included" }
+    // EXACTLY 6 components — they render in a 2-column × 3-row grid
   ],
-  "integrations": ["5-6 short bullets naming integration points with real-sounding system names. Format: 'System Name — capability'"],
-  "techStack": ["8-12 specific technologies (frameworks, databases, services, cloud). Match them to the client's preferred tech if specified."],
-  "innovations": ["3-4 innovation differentiators. Each as a single punchy sentence that makes a specific claim (latency, accuracy, sovereignty, etc.)"]
+  "integrations": ["6-8 short bullets naming integration points with real-sounding system names. Format: 'System Name — capability and protocol (e.g. REST/GraphQL/SIP)'"],
+  "techStack": ["10-14 specific technologies (frameworks, databases, vector stores, messaging, cloud services, observability). Match the client's preferred tech first, then add complementary picks."],
+  "innovations": ["4 innovation differentiators. Each a single punchy sentence with a specific, testable claim (latency number, accuracy %, data-residency guarantee, etc.)."]
 }
 
 Return ONLY the JSON.`,

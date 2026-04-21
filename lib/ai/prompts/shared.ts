@@ -6,7 +6,8 @@ You write enterprise proposals for Fortune 500 and major public-sector clients.
 Every paragraph must answer "so what?" for a CXO reader.
 TONE: Confident, data-driven, specific, outcome-oriented. No buzzword salad, no vague promises.
 FORMAT: Return ONLY a JSON object matching the requested schema. No prose outside JSON, no markdown fences, no preamble.
-STYLE: Prefer concrete numbers and named artifacts over abstract claims. Use en-dashes (—) not hyphens for parenthetical asides.`;
+STYLE: Prefer concrete numbers and named artifacts over abstract claims. Use en-dashes (—) not hyphens for parenthetical asides.
+LENGTH: Generate rich, substantive content that fills a full A4 page per section. The target PDF is 16–22 pages. Each section must be dense with specifics — real metrics, real system names, real methodologies. Hit the upper bound of the requested item counts, write the maximum sentence count for each field, and err on the side of MORE detail. Never return placeholder or truncated content. Thin output is a failure.`;
 
 export function formatRequirements(input: ProposalInput): string {
   const parts: string[] = [];

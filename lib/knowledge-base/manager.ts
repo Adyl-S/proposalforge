@@ -45,7 +45,8 @@ function readJson<T>(path: string, fallback: T): T {
   if (!existsSync(path)) return fallback;
   try {
     return JSON.parse(readFileSync(path, 'utf-8')) as T;
-  } catch {
+  } catch (err) {
+    console.error(`[KB] Failed to parse ${path}:`, err);
     return fallback;
   }
 }

@@ -17,17 +17,17 @@ Use the budget range to calibrate. If only a max is given, use 85% of it. Person
 
 === RETURN THIS JSON SHAPE ===
 {
-  "pricingModelLabel": "e.g. 'Fixed Price · 5 Phases'",
+  "pricingModelLabel": "e.g. 'Fixed Price · 4 Phases'",
   "phases": [
     { "name": "Phase name (match project phases)", "focus": "3-6 word focus area", "effortPD": 68, "amount": 28000 }
-    // one entry per phase, amounts as raw numbers
+    // one entry per phase (match the phase count provided above), amounts as raw numbers
   ],
   "totalAmount": <total number>,
   "paymentMilestones": [
     { "num": 1, "name": "Milestone name", "trigger": "Trigger condition", "amount": 30000 }
-    // 5-7 milestones summing exactly to totalAmount
+    // 6 milestones summing exactly to totalAmount (Mobilization, Design Sign-off, Foundation Acceptance, Alpha Delivered, Go-Live, Steady-State Sign-off)
   ],
-  "notes": "1-2 sentences on what's excluded (third-party licensing, travel), and any TCO caveats."
+  "notes": "2-3 sentences on what's excluded (third-party licensing, travel, pass-through costs), any TCO caveats, and a note on GST/tax treatment."
 }
 
 Return ONLY the JSON.`,

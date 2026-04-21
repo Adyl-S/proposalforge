@@ -15,8 +15,8 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <span className="mark">PF</span>
-        <span>ProposalForge</span>
+        <span className="mark">PG</span>
+        <span>Proposal Generator</span>
       </div>
 
       <nav className="sidebar-nav">

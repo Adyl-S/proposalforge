@@ -20,12 +20,12 @@ ${formatCompany(company)}
 === RETURN THIS JSON SHAPE ===
 {
   "differentiators": [
-    { "icon": "◆", "headline": "4-6 word headline", "description": "1-2 sentences with a specific capability or proof point" }
-    // 6 differentiators
+    { "icon": "◆", "headline": "4-6 word headline", "description": "2-3 sentences with a specific capability, proof point, and concrete outcome — name real systems, regulators, or methodologies where possible" }
+    // EXACTLY 6 differentiators (render in 2-column × 3-row grid)
   ],
   "stats": [
     { "value": "Number or metric (e.g. '50+', '99.95%')", "label": "2-3 word label (uppercase-friendly)" }
-    // 4 stats — use real company data when available
+    // EXACTLY 4 stats — use real company data when available
   ]
 }
 

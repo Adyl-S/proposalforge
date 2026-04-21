@@ -15,11 +15,11 @@ ${formatRequirements(input)}
   "totalWeeks": <number — total project duration in weeks>,
   "phases": [
     { "num": 1, "name": "Phase name", "focus": "short 3-6 word focus area", "startWeek": 0, "durationWeeks": 4 }
-    // 4-5 phases; phases may overlap (e.g. phase 2 starts before phase 1 ends)
+    // EXACTLY 5 phases matching methodology (Discovery & Design, Foundation Build, Core Implementation, Integration & QA, UAT & Rollout); phases may overlap (e.g. phase 2 starts before phase 1 ends)
   ],
   "milestones": [
     { "label": "milestone (2-4 words)", "atWeek": <number> }
-    // 4-6 milestones at key gate points
+    // 5-7 milestones at key gate points
   ]
 }
 

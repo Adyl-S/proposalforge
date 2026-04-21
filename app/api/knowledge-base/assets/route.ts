@@ -33,7 +33,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'file too large (max 5 MB)' }, { status: 400 });
   }
 
-  const safeName = `${Date.now()}-${slugify(file.name.replace(ext, ''))}${ext}`;
+  const baseName = file.name.lastIndexOf(ext) > 0 ? file.name.slice(0, file.name.lastIndexOf(ext)) : file.name;
+  const safeName = `${Date.now()}-${slugify(baseName)}${ext}`;
   const buf = Buffer.from(await file.arrayBuffer());
   writeFileSync(assetPath(safeName), buf);
   return NextResponse.json({ name: safeName, size: buf.length }, { status: 201 });

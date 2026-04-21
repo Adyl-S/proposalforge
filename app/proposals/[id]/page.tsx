@@ -53,8 +53,8 @@ export default function ProposalDetailPage({ params }: { params: { id: string } 
         </div>
         <div className="stat">
           <div className="stat-label">AI Provider</div>
-          <div className="stat-value" style={{ fontSize: 18 }}>{meta.aiProvider.split(' ')[0]}</div>
-          <div className="stat-foot">{meta.aiProvider}</div>
+          <div className="stat-value" style={{ fontSize: 18 }}>{meta.aiProvider?.split(' ')[0] ?? 'Unknown'}</div>
+          <div className="stat-foot">{meta.aiProvider ?? '—'}</div>
         </div>
       </div>
 

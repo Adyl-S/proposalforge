@@ -3,7 +3,7 @@ import './globals.css';
 import { Sidebar } from '@/components/ui/Sidebar';
 
 export const metadata: Metadata = {
-  title: 'ProposalForge — Enterprise Proposal Generator',
+  title: 'Proposal Generator — Enterprise Proposal Generator',
   description: 'AI-generated, enterprise-grade project proposals in minutes.',
 };
 

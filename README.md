@@ -1,6 +1,6 @@
 <div align="center">
 
-# ProposalForge
+# Proposal Generator
 
 ### AI-powered enterprise proposal generator — from a one-line brief to a 15-25 page, Big 4-grade PDF in under 60 seconds.
 
@@ -21,7 +21,7 @@
 
 ## What is this?
 
-ProposalForge turns a short project brief into the kind of **15–25 page enterprise proposal** a firm like Accenture, Deloitte, or McKinsey would send to a Fortune 500 client — complete with executive summary, problem analysis, solution architecture, Gantt timeline, team bios pulled from your knowledge base, relevant case studies, budget breakdown with donut chart, risk matrix, governance model, and commercial terms.
+Proposal Generator turns a short project brief into the kind of **15–25 page enterprise proposal** a firm like Accenture, Deloitte, or McKinsey would send to a Fortune 500 client — complete with executive summary, problem analysis, solution architecture, Gantt timeline, team bios pulled from your knowledge base, relevant case studies, budget breakdown with donut chart, risk matrix, governance model, and commercial terms.
 
 Give it:
 
@@ -35,7 +35,7 @@ Click generate. A minute later you have a production-ready PDF.
 
 ## Why it's different
 
-Most "AI proposal" tools give you Markdown or a generic Word doc. ProposalForge ships **pixel-perfect PDFs** that actually look like they came from a top-tier consulting firm:
+Most "AI proposal" tools give you Markdown or a generic Word doc. Proposal Generator ships **pixel-perfect PDFs** that actually look like they came from a top-tier consulting firm:
 
 - **AI writes the content. The design is fixed.** 14 hand-crafted HTML/CSS templates with an enterprise design system. The AI fills in JSON; the template renders the PDF.
 - **Vector-sharp charts, zero native deps.** Gantt timelines, budget donuts, and metric bars are emitted as inline SVG — no Chart.js, no `node-canvas`, no Windows compile headaches.
@@ -279,7 +279,7 @@ Each generated proposal includes:
 | `OPENAI_API_KEY`        | one of the 3    | —                                     | Uses native OpenAI SDK                         |
 | `OPENAI_MODEL`          | no              | `gpt-4o-mini`                         |                                                |
 | `OPENROUTER_REFERER`    | no              | `https://proposalforge.local`         | For OpenRouter attribution                     |
-| `OPENROUTER_TITLE`      | no              | `ProposalForge`                       | Shown in OpenRouter dashboard                  |
+| `OPENROUTER_TITLE`      | no              | `Proposal Generator`                       | Shown in OpenRouter dashboard                  |
 | `PORT`                  | no              | `3000`                                | Next.js dev server port                        |
 
 See [`.env.example`](.env.example) for the full template.

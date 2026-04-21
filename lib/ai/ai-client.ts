@@ -11,7 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 
-const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5-20250929';
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6';
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 // OpenRouter model — pick any model from https://openrouter.ai/models
 // Good defaults: anthropic/claude-sonnet-4.5, openai/gpt-4o-mini, google/gemini-2.5-pro
@@ -67,7 +67,7 @@ function getOpenRouter(): OpenAI | null {
       defaultHeaders: {
         // OpenRouter analytics headers — optional but help attribution
         'HTTP-Referer': process.env.OPENROUTER_REFERER ?? 'https://proposalforge.local',
-        'X-Title': process.env.OPENROUTER_TITLE ?? 'ProposalForge',
+        'X-Title': process.env.OPENROUTER_TITLE ?? 'Proposal Generator',
       },
     });
   }

@@ -1,4 +1,4 @@
-# ProposalForge — AI Enterprise Proposal Generator
+# Proposal Generator — AI Enterprise Proposal Generator
 
 **Status**: New Build
 **Stack**: Next.js 14 (App Router) + TypeScript + Puppeteer (PDF) + Claude/OpenAI API
@@ -6,9 +6,9 @@
 
 ---
 
-## What is ProposalForge?
+## What is Proposal Generator?
 
-ProposalForge is a tool that generates **enterprise-level project proposals** — the kind that companies like Accenture, Deloitte, McKinsey, TCS, and Infosys send when pitching to large enterprise clients. 
+Proposal Generator is a tool that generates **enterprise-level project proposals** — the kind that companies like Accenture, Deloitte, McKinsey, TCS, and Infosys send when pitching to large enterprise clients. 
 
 The user provides:
 1. **A project prompt** — e.g., "Build an AI-powered customer service chatbot for HDFC Bank"
@@ -624,7 +624,7 @@ ANTHROPIC_API_KEY=           # For Claude API
 OPENAI_API_KEY=              # For GPT-4o (fallback)
 
 # App
-NEXT_PUBLIC_APP_NAME=ProposalForge
+NEXT_PUBLIC_APP_NAME=Proposal Generator
 PORT=3000
 ```
 
