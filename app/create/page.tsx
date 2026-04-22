@@ -11,6 +11,12 @@ const COMPLIANCE = ['SOC2', 'HIPAA', 'GDPR', 'ISO27001', 'RBI', 'DPDPA', 'PCI-DS
 const METHODOLOGIES = ['Agile', 'Waterfall', 'Hybrid'];
 const PRICING_MODELS = ['Fixed Price', 'Time & Materials', 'Hybrid', 'Outcome-Linked'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD'];
+const USE_CASES: { value: 'linkedin' | 'upwork' | 'small' | 'legacy'; label: string }[] = [
+  { value: 'small', label: 'Small Proposal (3–5 pages)' },
+  { value: 'legacy', label: 'Legacy Enterprise Proposal (10–15 pages)' },
+  { value: 'linkedin', label: 'LinkedIn DM' },
+  { value: 'upwork', label: 'Upwork Cover Letter' },
+];
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -20,6 +26,8 @@ export default function CreatePage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(0);
   const [input, setInput] = useState<ProposalInput>({
+    useCase: 'small',
+    userOwner: 'pk',
     projectTitle: '',
     clientName: '',
     clientIndustry: 'FinTech',
@@ -108,6 +116,19 @@ export default function CreatePage() {
               <p className="text-muted mb-lg">
                 Tell us what you&apos;re proposing. The clearer your brief, the better the AI output.
               </p>
+
+              <div className="field">
+                <label>Proposal Type</label>
+                <select
+                  value={input.useCase}
+                  onChange={(e) => set('useCase', e.target.value as ProposalInput['useCase'])}
+                >
+                  {USE_CASES.map((u) => (
+                    <option key={u.value} value={u.value}>{u.label}</option>
+                  ))}
+                </select>
+                <span className="hint">Determines proposal length and structure. Legacy runs extra enrichment.</span>
+              </div>
 
               <div className="field">
                 <label>Project Title</label>
