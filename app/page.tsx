@@ -24,8 +24,8 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export default function Dashboard() {
-  const proposals = listProposals();
+export default async function Dashboard() {
+  const proposals = await listProposals();
   const kb = getKnowledgeBase();
   const aiReady = hasAnyAiProvider();
 

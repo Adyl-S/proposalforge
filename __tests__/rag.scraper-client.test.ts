@@ -49,6 +49,7 @@ const SAMPLE: EnrichedCompany = {
       email: 'alice@acme.com',
       email_status: 'verified',
       rationale: 'Owns ops',
+      source: 'website',
     },
     secondary: null,
     tertiary: null,

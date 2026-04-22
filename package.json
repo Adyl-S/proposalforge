@@ -9,10 +9,16 @@
     "lint": "next lint",
     "test": "jest",
     "test:pdf": "tsx scripts/test-pdf.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "prisma": "dotenv -e .env.local -e .env -- prisma",
+    "db:generate": "prisma generate",
+    "db:migrate": "dotenv -e .env.local -e .env -- prisma migrate dev",
+    "db:migrate:deploy": "dotenv -e .env.local -e .env -- prisma migrate deploy",
+    "db:backfill": "dotenv -e .env.local -e .env -- tsx scripts/backfill-proposals.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@prisma/client": "^6.19.3",
     "chart.js": "^4.4.6",
     "chartjs-node-canvas": "^5.0.0",
     "date-fns": "^4.1.0",
@@ -31,7 +37,9 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/uuid": "^10.0.0",
+    "dotenv-cli": "^11.0.0",
     "jest": "^30.3.0",
+    "prisma": "^6.19.3",
     "ts-jest": "^29.4.9",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

@@ -1,0 +1,64 @@
+// Prisma schema for the proposal-forge (proposals-outreach) repo.
+//
+// Tier 0 Step 4: forge storage moves off local JSON into shared Postgres.
+// The `proposals` schema is fully owned by forge/Prisma. The `public` schema
+// is owned by the scraper's Alembic — we do NOT model any scraper tables
+// here. Cross-schema referential integrity for `enriched_company_id` is
+// enforced at the application layer (via fetchEnrichedCompany) rather than
+// via a DB-level FK, because the two tables have different ORM owners and
+// sync'd migrations aren't practical for now.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["proposals"]
+}
+
+enum DraftStatus {
+  generated
+  in_review
+  approved
+  sent
+
+  @@schema("proposals")
+}
+
+model Proposal {
+  id                  String      @id @db.Uuid
+  /// FK target lives in the scraper's `public.analyzed_content` — NOT modeled
+  /// here. Nullable because legacy proposals (pre-Step 5) have no scraper row.
+  enrichedCompanyId   String?     @map("enriched_company_id") @db.Uuid
+  useCase             String      @map("use_case") @db.VarChar(20)
+  userOwner           String      @map("user_owner") @db.VarChar(50)
+  draftStatus         DraftStatus @default(generated) @map("draft_status")
+  /// Full ProposalData sections (executive summary, timeline, etc.) — keeps
+  /// regeneration cheap and feeds Tier 2 Step 18's section editor.
+  sections            Json        @default("{}") @db.JsonB
+
+  // Legacy metadata preserved from the filesystem meta.json shape so the
+  // existing UI/listing stays functional during the transition.
+  projectTitle        String      @map("project_title")
+  clientName          String      @map("client_name")
+  clientIndustry      String      @map("client_industry")
+  status              String      @db.VarChar(20) // 'generated' | 'draft'
+  version             String      @default("1.0") @db.VarChar(20)
+  aiProvider          String      @map("ai_provider") @db.VarChar(100)
+  sizeBytes           Int         @default(0) @map("size_bytes")
+  /// Complete ProposalInput that was used to generate this proposal. Drives
+  /// re-generation in the UI.
+  input               Json        @db.JsonB
+
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([enrichedCompanyId])
+  @@index([userOwner])
+  @@index([draftStatus])
+  @@index([createdAt(sort: Desc)])
+  @@map("proposals")
+  @@schema("proposals")
+}

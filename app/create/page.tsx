@@ -32,6 +32,7 @@ export default function CreatePage() {
     clientName: '',
     clientIndustry: 'FinTech',
     projectPrompt: '',
+    enrichedCompanyId: '',
     currency: 'USD',
     budgetMin: 150000,
     budgetMax: 250000,
@@ -62,8 +63,16 @@ export default function CreatePage() {
     setInput((p) => ({ ...p, [key]: value }));
   }
 
+  const usesScraperInput = input.useCase === 'legacy' || input.useCase === 'small';
+
   function canProceed(s: Step): boolean {
-    if (s === 0) return Boolean(input.projectTitle && input.clientName && input.projectPrompt.trim().length > 20);
+    if (s === 0) {
+      if (!input.projectTitle || !input.clientName) return false;
+      if (usesScraperInput) {
+        return Boolean(input.enrichedCompanyId && input.enrichedCompanyId.trim().length > 0);
+      }
+      return input.projectPrompt.trim().length > 20;
+    }
     return true;
   }
 
@@ -162,16 +171,33 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              <div className="field">
-                <label>Project Description <span style={{ color: 'var(--c-danger)' }}>*</span></label>
-                <textarea
-                  value={input.projectPrompt}
-                  onChange={(e) => set('projectPrompt', e.target.value)}
-                  rows={8}
-                  placeholder="Describe what you're building, for whom, and why. E.g. 'Build an AI-powered customer service chatbot for a major Indian bank with 50 million customers. The bank currently handles 2.1M monthly contacts manually with a 14% repeat-contact rate. Goal: reduce tier-1 cost-to-serve by 45% with voice/chat AI agents operating in Hindi, English, and regional languages.'"
-                />
-                <span className="hint">At least 20 characters. The more context, the sharper the proposal.</span>
-              </div>
+              {usesScraperInput ? (
+                <div className="field">
+                  <label>
+                    Scraper Analysis ID <span style={{ color: 'var(--c-danger)' }}>*</span>
+                  </label>
+                  <input
+                    value={input.enrichedCompanyId ?? ''}
+                    onChange={(e) => set('enrichedCompanyId', e.target.value)}
+                    placeholder="e.g. 22222222-2222-2222-2222-222222222222"
+                  />
+                  <span className="hint">
+                    Paste the <code>analysis_id</code> from the scraper UI. The analysis must be
+                    <strong> approved</strong> (PATCH <code>/api/v1/analysis/&lt;id&gt;</code>) before generation will run.
+                  </span>
+                </div>
+              ) : (
+                <div className="field">
+                  <label>Project Description <span style={{ color: 'var(--c-danger)' }}>*</span></label>
+                  <textarea
+                    value={input.projectPrompt}
+                    onChange={(e) => set('projectPrompt', e.target.value)}
+                    rows={8}
+                    placeholder="Describe what you're building, for whom, and why. E.g. 'Build an AI-powered customer service chatbot for a major Indian bank with 50 million customers. The bank currently handles 2.1M monthly contacts manually with a 14% repeat-contact rate. Goal: reduce tier-1 cost-to-serve by 45% with voice/chat AI agents operating in Hindi, English, and regional languages.'"
+                  />
+                  <span className="hint">At least 20 characters. The more context, the sharper the proposal.</span>
+                </div>
+              )}
             </div>
           )}
 

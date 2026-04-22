@@ -5,8 +5,8 @@ import { DeleteButton } from './DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
-export default function ProposalDetailPage({ params }: { params: { id: string } }) {
-  const meta = getProposalMeta(params.id);
+export default async function ProposalDetailPage({ params }: { params: { id: string } }) {
+  const meta = await getProposalMeta(params.id);
   if (!meta) notFound();
 
   const created = new Date(meta.createdAt);

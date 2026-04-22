@@ -17,6 +17,7 @@ export type Archetype = 'founder_led_midmarket' | 'pe_growth' | 'large_corporate
 export type Seniority = 'c_suite' | 'vp' | 'director' | 'manager' | 'ic';
 export type EmailStatus = 'verified' | 'pattern_guess' | 'not_found';
 export type Effort = 'small' | 'medium' | 'large';
+export type ContactSource = 'website' | 'linkedin' | 'news' | 'manual';
 
 export interface RecentEvent {
   date: string | null;
@@ -60,6 +61,7 @@ export interface Contact {
   email: string | null;
   email_status: EmailStatus;
   rationale: string | null;
+  source: ContactSource;
 }
 
 export interface People {
@@ -113,7 +115,18 @@ export interface ProposalInput {
   projectTitle: string;
   clientName: string;
   clientIndustry: string;
-  projectPrompt: string; // the core user input — what the project is about
+  /**
+   * The core user input for linkedin/upwork use-cases.
+   * For legacy/small use-cases, Step 5 replaces this with a synthesised prompt
+   * derived from the scraper's EnrichedCompany.
+   */
+  projectPrompt: string;
+  /**
+   * Scraper analysis id. When set for legacy/small use-cases, overrides
+   * projectPrompt. The analysis must be in status='approved' on the scraper
+   * before generation will proceed.
+   */
+  enrichedCompanyId?: string;
 
   // Step 2: requirements
   budgetMin?: number;

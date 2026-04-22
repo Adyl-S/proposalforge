@@ -19,9 +19,20 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
-  if (!input?.projectPrompt || !input?.projectTitle || !input?.clientName) {
+  if (!input?.projectTitle || !input?.clientName) {
     return NextResponse.json(
-      { error: 'projectTitle, clientName, and projectPrompt are required' },
+      { error: 'projectTitle and clientName are required' },
+      { status: 400 },
+    );
+  }
+
+  // Step 5: legacy/small flows must supply enrichedCompanyId OR projectPrompt.
+  // linkedin/upwork still use the textarea path via projectPrompt.
+  const hasEnriched = Boolean(input.enrichedCompanyId?.trim());
+  const hasTextPrompt = Boolean(input.projectPrompt?.trim());
+  if (!hasEnriched && !hasTextPrompt) {
+    return NextResponse.json(
+      { error: 'Either enrichedCompanyId or projectPrompt is required' },
       { status: 400 },
     );
   }
@@ -38,7 +49,7 @@ export async function POST(req: Request) {
     const outPath = join(dir, 'proposal.pdf');
     const pdf = await generateProposalPdf({ html, outputPath: outPath });
 
-    saveProposal(id, pdf, {
+    await saveProposal(id, pdf, {
       id,
       projectTitle: input.projectTitle,
       clientName: input.clientName,
@@ -49,6 +60,9 @@ export async function POST(req: Request) {
       aiProvider: aiProviderName(),
       sizeBytes: pdf.length,
       input,
+      enrichedCompanyId: input.enrichedCompanyId ?? null,
+      draftStatus: 'generated',
+      sections: data as unknown as Record<string, unknown>,
     });
 
     return NextResponse.json({
@@ -62,6 +76,12 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error('[api/generate] error:', err);
     const msg = err instanceof Error ? err.message : 'generation failed';
-    return NextResponse.json({ error: msg }, { status: 500 });
+    // Approval-gate failure surfaces as 400 so the UI can show a clear message
+    // without looking like a server crash.
+    const isApprovalGate = msg.startsWith('Analysis pending review');
+    return NextResponse.json(
+      { error: msg },
+      { status: isApprovalGate ? 400 : 500 },
+    );
   }
 }

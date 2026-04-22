@@ -4,26 +4,27 @@
  * end-to-end orchestrator output looks correct.
  */
 
-import { mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import puppeteer from 'puppeteer';
 import { generateProposalData } from '../lib/ai/generate-proposal';
 import { assembleProposalHtml } from '../lib/pdf/template';
 import { buildEmbeddedFontCss } from '../lib/pdf/generate-pdf';
 import { getKnowledgeBase } from '../lib/knowledge-base/manager';
-import { listProposals } from '../lib/proposals/store';
-import type { ProposalMetadata } from '../lib/proposals/store';
+import { getProposalMeta, listProposals } from '../lib/proposals/store';
 
 async function main() {
-  const summaries = listProposals();
+  const summaries = await listProposals();
   if (!summaries.length) {
     console.error('No proposals found — run the generate flow first.');
     return;
   }
   const id = summaries[0].id;
-  const metaPath = join(process.cwd(), 'data', 'proposals', id, 'meta.json');
-  if (!existsSync(metaPath)) return;
-  const meta = JSON.parse(readFileSync(metaPath, 'utf-8')) as ProposalMetadata;
+  const meta = await getProposalMeta(id);
+  if (!meta) {
+    console.error(`No meta row found for proposal ${id}.`);
+    return;
+  }
   const kb = getKnowledgeBase();
 
   const data = await generateProposalData(meta.input, kb);

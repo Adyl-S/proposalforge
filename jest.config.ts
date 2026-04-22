@@ -11,6 +11,8 @@ const config: Config = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' } }],
   },
+  setupFiles: ['<rootDir>/__tests__/setup/env.ts'],
+  globalSetup: '<rootDir>/__tests__/setup/global-setup.ts',
 };
 
 export default config;

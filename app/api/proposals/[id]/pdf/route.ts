@@ -7,7 +7,7 @@ export async function GET(req: Request, ctx: { params: { id: string } }) {
   const pdf = getProposalPdf(ctx.params.id);
   if (!pdf) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
-  const meta = getProposalMeta(ctx.params.id);
+  const meta = await getProposalMeta(ctx.params.id);
   const url = new URL(req.url);
   const download = url.searchParams.get('download') === '1';
   const filename = `${(meta?.clientName ?? 'proposal').replace(/\s+/g, '-')}-${ctx.params.id}.pdf`;

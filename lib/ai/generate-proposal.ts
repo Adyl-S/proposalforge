@@ -6,6 +6,8 @@
  */
 
 import { generate, hasAnyAiProvider } from './ai-client';
+import { fetchEnrichedCompany } from '@/lib/rag/scraper-client';
+import type { EnrichedCompany } from './types';
 import { executiveSummaryPrompt } from './prompts/executive-summary';
 import { problemStatementPrompt } from './prompts/problem-statement';
 import { proposedSolutionPrompt } from './prompts/proposed-solution';
@@ -160,6 +162,109 @@ function selectCaseStudies(
 }
 
 // ────────────────────────────────────────────────────────────
+// Step 5 — EnrichedCompany -> single structured projectPrompt
+// ────────────────────────────────────────────────────────────
+
+/**
+ * Tier 0 projection: roll the EnrichedCompany into one detailed brief string that
+ * the existing 13 section prompts can consume unchanged. Tier 1 Step 11 will
+ * split this into per-section prompts; until then the single-string path keeps
+ * the blast radius small.
+ */
+export function synthesizeProjectPromptFromEnriched(ec: EnrichedCompany): string {
+  const co = ec.company;
+  const lines: string[] = [];
+
+  const header = `Prepare an enterprise AI transformation proposal for ${co.name ?? 'the target company'}`;
+  const ctx = [
+    co.industry && `in the ${co.industry} sector`,
+    co.sub_industry && `(${co.sub_industry})`,
+    co.size.employees_band && `~${co.size.employees_band} employees`,
+    co.size.revenue_band && `revenue band ${co.size.revenue_band}`,
+    co.hq_country && `headquartered in ${co.hq_country}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  lines.push(`${header}${ctx ? ', ' + ctx : ''}.`);
+
+  if (co.archetype) lines.push(`Ownership archetype: ${co.archetype.replace(/_/g, ' ')}.`);
+  if (co.founded_year) lines.push(`Founded ${co.founded_year}.`);
+
+  if (co.recent_events.length) {
+    lines.push('', 'Recent events:');
+    for (const ev of co.recent_events) {
+      lines.push(`- ${ev.date ? `[${ev.date}] ` : ''}${ev.type}: ${ev.description}`);
+    }
+  }
+
+  const sig = ec.signals;
+  lines.push('', 'Observed signals:');
+  if (sig.tech_stack.length) lines.push(`- Tech stack: ${sig.tech_stack.join(', ')}`);
+  if (sig.hiring_roles.length) lines.push(`- Hiring: ${sig.hiring_roles.join(', ')}`);
+  if (sig.pain_indicators.length) lines.push(`- Pain indicators: ${sig.pain_indicators.join(', ')}`);
+  if (sig.compliance_footprint.length) {
+    lines.push(`- Compliance footprint: ${sig.compliance_footprint.join(', ')}`);
+  }
+  lines.push(`- Digital maturity score: ${sig.digital_maturity_score.toFixed(2)} (0-1)`);
+
+  if (ec.opportunities.length) {
+    lines.push('', 'Automation opportunities surfaced by scraper analysis:');
+    for (const op of ec.opportunities) {
+      lines.push(
+        `- ${op.title} — effort ${op.effort}, priority ${op.priority_score.toFixed(2)}`,
+      );
+      lines.push(`  Current: ${op.current_state}`);
+      lines.push(`  Proposed: ${op.proposed_state}`);
+      lines.push(`  Impact: ${op.impact.metric} ≈ ${op.impact.estimated_value}`);
+    }
+  }
+
+  const { primary, secondary, tertiary } = ec.people;
+  if (primary || secondary || tertiary) {
+    lines.push('', 'Key decision makers:');
+    for (const [label, c] of [
+      ['Primary', primary],
+      ['Secondary', secondary],
+      ['Tertiary', tertiary],
+    ] as const) {
+      if (!c) continue;
+      lines.push(
+        `- ${label}: ${c.name}, ${c.role} (${c.seniority})${c.rationale ? ' — ' + c.rationale : ''}`,
+      );
+    }
+  }
+
+  lines.push(
+    '',
+    `Confidence: overall ${ec.confidence.overall.toFixed(2)}. Use this data to ground every claim — cite the actual industry, size, and signals; avoid generic framing.`,
+  );
+
+  return lines.join('\n');
+}
+
+async function hydrateFromEnriched(
+  input: ProposalInput,
+): Promise<ProposalInput> {
+  if (!input.enrichedCompanyId) return input;
+
+  const ec = await fetchEnrichedCompany(input.enrichedCompanyId);
+
+  if (ec.status !== 'approved') {
+    throw new Error(
+      `Analysis pending review — approve in scraper UI first. (current status: ${ec.status})`,
+    );
+  }
+
+  return {
+    ...input,
+    projectPrompt: synthesizeProjectPromptFromEnriched(ec),
+    // Auto-fill client metadata from the scraper only when the caller left it blank.
+    clientName: input.clientName || ec.company.name || input.clientName,
+    clientIndustry: input.clientIndustry || ec.company.industry || input.clientIndustry,
+  };
+}
+
+// ────────────────────────────────────────────────────────────
 // MAIN
 // ────────────────────────────────────────────────────────────
 export async function generateProposalData(
@@ -167,6 +272,8 @@ export async function generateProposalData(
   kb: KnowledgeBase,
   onProgress?: ProgressCb,
 ): Promise<ProposalData> {
+  // eslint-disable-next-line no-param-reassign
+  input = await hydrateFromEnriched(input);
   const useAi = hasAnyAiProvider();
   const currency = input.currency ?? 'USD';
 

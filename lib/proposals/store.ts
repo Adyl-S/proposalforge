@@ -1,14 +1,24 @@
 /**
- * Proposal storage — each generated proposal is a directory under data/proposals/<id>/
- * containing proposal.pdf and meta.json.
+ * Proposal storage — Tier 0 Step 4.
+ *
+ * Metadata + `sections` live in Postgres (proposals.proposals). The generated
+ * PDF binary stays on disk at data/proposals/<id>/proposal.pdf so the iframe
+ * preview + download routes keep working without streaming bytes through the
+ * DB.
  */
 
-import { mkdirSync, writeFileSync, readdirSync, existsSync, readFileSync, statSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import type { ProposalInput } from '@/lib/ai/types';
 
-const ROOT = join(process.cwd(), 'data', 'proposals');
+import type { ProposalInput } from '@/lib/ai/types';
+import { prisma } from '@/lib/db/client';
+
+function rootDir(): string {
+  return join(process.cwd(), 'data', 'proposals');
+}
+
+// ─── Types (unchanged public surface) ────────────────────────────────────────
 
 export interface ProposalMetadata {
   id: string;
@@ -21,6 +31,11 @@ export interface ProposalMetadata {
   aiProvider: string;
   sizeBytes: number;
   input: ProposalInput;
+  /// Optional fields introduced in Step 4 so callers can store richer state
+  /// without breaking existing consumers.
+  enrichedCompanyId?: string | null;
+  draftStatus?: 'generated' | 'in_review' | 'approved' | 'sent';
+  sections?: Record<string, unknown>;
 }
 
 export interface ProposalSummary {
@@ -33,75 +48,151 @@ export interface ProposalSummary {
   status: string;
 }
 
-function ensureRoot() {
-  mkdirSync(ROOT, { recursive: true });
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function ensureRoot(): void {
+  mkdirSync(rootDir(), { recursive: true });
 }
 
 export function newProposalId(): string {
-  return `p-${randomUUID().slice(0, 12)}`;
+  // UUID so it parses as Postgres UUID and matches the Prisma @db.Uuid column.
+  return randomUUID();
 }
 
 export function proposalDir(id: string): string {
-  return join(ROOT, id);
+  return join(rootDir(), id);
 }
 
-export function saveProposal(id: string, pdf: Buffer, meta: ProposalMetadata): void {
+function pdfPath(id: string): string {
+  return join(proposalDir(id), 'proposal.pdf');
+}
+
+function normalizeDraftStatus(
+  status: ProposalMetadata['draftStatus'],
+): 'generated' | 'in_review' | 'approved' | 'sent' {
+  return status ?? 'generated';
+}
+
+// ─── Core CRUD ───────────────────────────────────────────────────────────────
+
+export async function saveProposal(
+  id: string,
+  pdf: Buffer,
+  meta: ProposalMetadata,
+): Promise<void> {
   ensureRoot();
   const dir = proposalDir(id);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'proposal.pdf'), pdf);
-  writeFileSync(join(dir, 'meta.json'), JSON.stringify(meta, null, 2), 'utf-8');
+  writeFileSync(pdfPath(id), pdf);
+
+  const createdAt = meta.createdAt ? new Date(meta.createdAt) : new Date();
+
+  await prisma.proposal.upsert({
+    where: { id },
+    create: {
+      id,
+      enrichedCompanyId: meta.enrichedCompanyId ?? null,
+      useCase: meta.input.useCase ?? 'small',
+      userOwner: meta.input.userOwner ?? 'pk',
+      draftStatus: normalizeDraftStatus(meta.draftStatus),
+      sections: (meta.sections as object | null) ?? {},
+      projectTitle: meta.projectTitle,
+      clientName: meta.clientName,
+      clientIndustry: meta.clientIndustry,
+      status: meta.status,
+      version: meta.version,
+      aiProvider: meta.aiProvider,
+      sizeBytes: meta.sizeBytes,
+      input: meta.input as unknown as object,
+      createdAt,
+    },
+    update: {
+      enrichedCompanyId: meta.enrichedCompanyId ?? null,
+      useCase: meta.input.useCase ?? 'small',
+      userOwner: meta.input.userOwner ?? 'pk',
+      draftStatus: normalizeDraftStatus(meta.draftStatus),
+      sections: (meta.sections as object | null) ?? {},
+      projectTitle: meta.projectTitle,
+      clientName: meta.clientName,
+      clientIndustry: meta.clientIndustry,
+      status: meta.status,
+      version: meta.version,
+      aiProvider: meta.aiProvider,
+      sizeBytes: meta.sizeBytes,
+      input: meta.input as unknown as object,
+    },
+  });
 }
 
-export function getProposalMeta(id: string): ProposalMetadata | undefined {
-  const p = join(proposalDir(id), 'meta.json');
-  if (!existsSync(p)) return undefined;
-  try {
-    return JSON.parse(readFileSync(p, 'utf-8')) as ProposalMetadata;
-  } catch {
-    return undefined;
-  }
+export async function getProposalMeta(id: string): Promise<ProposalMetadata | undefined> {
+  const row = await prisma.proposal.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return {
+    id: row.id,
+    projectTitle: row.projectTitle,
+    clientName: row.clientName,
+    clientIndustry: row.clientIndustry,
+    createdAt: row.createdAt.toISOString(),
+    status: row.status as 'generated' | 'draft',
+    version: row.version,
+    aiProvider: row.aiProvider,
+    sizeBytes: row.sizeBytes,
+    input: row.input as unknown as ProposalInput,
+    enrichedCompanyId: row.enrichedCompanyId ?? null,
+    draftStatus: row.draftStatus,
+    sections: row.sections as Record<string, unknown>,
+  };
 }
 
 export function getProposalPdf(id: string): Buffer | undefined {
-  const p = join(proposalDir(id), 'proposal.pdf');
+  const p = pdfPath(id);
   if (!existsSync(p)) return undefined;
   return readFileSync(p);
 }
 
-export function listProposals(): ProposalSummary[] {
-  ensureRoot();
-  const ids = readdirSync(ROOT, { withFileTypes: true })
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name);
-  return ids
-    .map((id) => getProposalMeta(id))
-    .filter((m): m is ProposalMetadata => !!m)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .map(({ id, projectTitle, clientName, clientIndustry, createdAt, sizeBytes, status }) => ({
-      id,
-      projectTitle,
-      clientName,
-      clientIndustry,
-      createdAt,
-      sizeBytes,
-      status,
-    }));
+export async function listProposals(): Promise<ProposalSummary[]> {
+  const rows = await prisma.proposal.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      projectTitle: true,
+      clientName: true,
+      clientIndustry: true,
+      createdAt: true,
+      sizeBytes: true,
+      status: true,
+    },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    projectTitle: r.projectTitle,
+    clientName: r.clientName,
+    clientIndustry: r.clientIndustry,
+    createdAt: r.createdAt.toISOString(),
+    sizeBytes: r.sizeBytes,
+    status: r.status,
+  }));
 }
 
-export function deleteProposal(id: string): boolean {
+export async function deleteProposal(id: string): Promise<boolean> {
+  const existed = await prisma.proposal.findUnique({ where: { id }, select: { id: true } });
+  if (existed) {
+    await prisma.proposal.delete({ where: { id } });
+  }
   const dir = proposalDir(id);
-  if (!existsSync(dir)) return false;
-  rmSync(dir, { recursive: true, force: true });
-  return true;
+  if (existsSync(dir)) {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  return Boolean(existed);
 }
 
-export function proposalExists(id: string): boolean {
-  return existsSync(join(proposalDir(id), 'proposal.pdf'));
+export async function proposalExists(id: string): Promise<boolean> {
+  const row = await prisma.proposal.findUnique({ where: { id }, select: { id: true } });
+  return Boolean(row);
 }
 
 export function proposalSize(id: string): number {
-  const p = join(proposalDir(id), 'proposal.pdf');
+  const p = pdfPath(id);
   if (!existsSync(p)) return 0;
   return statSync(p).size;
 }

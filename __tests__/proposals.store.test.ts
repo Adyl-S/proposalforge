@@ -1,31 +1,27 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+/**
+ * Tier 0 Step 4 — proposals.store.ts now backs onto Postgres (proposals schema).
+ * Tests use a dedicated test DB (proposal_forge_test) with Prisma migrations
+ * applied via Jest globalSetup. PDF bytes still live on disk, so each test runs
+ * inside a temp cwd to keep data/proposals/ clean.
+ */
+
+import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import type { ProposalInput } from '@/lib/ai/types';
-
-type StoreModule = typeof import('@/lib/proposals/store');
-
-/**
- * The store writes under `${process.cwd()}/data/proposals`. We swap cwd to a
- * fresh temp dir for each test so nothing leaks into the real data folder,
- * then reload the module so its `ROOT` constant picks up the new cwd.
- */
-function loadStoreInTempDir(): { store: StoreModule; cwd: string; cleanup: () => void } {
-  const tmpRoot = mkdtempSync(join(tmpdir(), 'pf-store-'));
-  const originalCwd = process.cwd();
-  process.chdir(tmpRoot);
-  jest.resetModules();
-  const store = require('@/lib/proposals/store') as StoreModule;
-  return {
-    store,
-    cwd: tmpRoot,
-    cleanup: () => {
-      process.chdir(originalCwd);
-      rmSync(tmpRoot, { recursive: true, force: true });
-    },
-  };
-}
+import { prisma } from '@/lib/db/client';
+import {
+  deleteProposal,
+  getProposalMeta,
+  getProposalPdf,
+  listProposals,
+  newProposalId,
+  proposalDir,
+  proposalExists,
+  proposalSize,
+  saveProposal,
+} from '@/lib/proposals/store';
 
 function baseInput(overrides: Partial<ProposalInput> = {}): ProposalInput {
   return {
@@ -51,63 +47,172 @@ function baseInput(overrides: Partial<ProposalInput> = {}): ProposalInput {
   };
 }
 
-describe('proposals/store: useCase and userOwner round-trip', () => {
-  it('persists useCase=legacy and userOwner=pk through saveProposal + getProposalMeta', () => {
-    const { store, cleanup } = loadStoreInTempDir();
-    try {
-      const id = store.newProposalId();
-      const input = baseInput({ useCase: 'legacy', userOwner: 'pk' });
-      const fakePdf = Buffer.from('%PDF-fake');
+const originalCwd = process.cwd();
+let tmpRoot: string;
 
-      store.saveProposal(id, fakePdf, {
-        id,
-        projectTitle: input.projectTitle,
-        clientName: input.clientName,
-        clientIndustry: input.clientIndustry,
-        createdAt: new Date().toISOString(),
-        status: 'generated',
-        version: input.proposalVersion ?? '1.0',
-        aiProvider: 'test',
-        sizeBytes: fakePdf.length,
-        input,
-      });
+beforeEach(async () => {
+  tmpRoot = mkdtempSync(join(tmpdir(), 'pf-store-'));
+  process.chdir(tmpRoot);
+  await prisma.proposal.deleteMany({});
+});
 
-      const meta = store.getProposalMeta(id);
-      expect(meta).toBeDefined();
-      expect(meta!.input.useCase).toBe('legacy');
-      expect(meta!.input.userOwner).toBe('pk');
-      expect(meta!.input.projectTitle).toBe(input.projectTitle);
-      expect(store.proposalExists(id)).toBe(true);
-    } finally {
-      cleanup();
-    }
+afterEach(() => {
+  process.chdir(originalCwd);
+  rmSync(tmpRoot, { recursive: true, force: true });
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
+
+describe('proposals/store (Postgres)', () => {
+  it('saveProposal persists row + PDF; getProposalMeta reads it back', async () => {
+    const id = newProposalId();
+    const input = baseInput({ useCase: 'legacy', userOwner: 'pk' });
+    const fakePdf = Buffer.from('%PDF-fake');
+
+    await saveProposal(id, fakePdf, {
+      id,
+      projectTitle: input.projectTitle,
+      clientName: input.clientName,
+      clientIndustry: input.clientIndustry,
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: input.proposalVersion ?? '1.0',
+      aiProvider: 'test',
+      sizeBytes: fakePdf.length,
+      input,
+      enrichedCompanyId: null,
+      draftStatus: 'generated',
+      sections: { executive: 'stub' },
+    });
+
+    const meta = await getProposalMeta(id);
+    expect(meta).toBeDefined();
+    expect(meta!.input.useCase).toBe('legacy');
+    expect(meta!.input.userOwner).toBe('pk');
+    expect(meta!.projectTitle).toBe(input.projectTitle);
+    expect(meta!.draftStatus).toBe('generated');
+    expect(meta!.sections).toEqual({ executive: 'stub' });
+
+    const onDisk = getProposalPdf(id);
+    expect(onDisk?.equals(fakePdf)).toBe(true);
+    expect(existsSync(join(proposalDir(id), 'proposal.pdf'))).toBe(true);
+
+    expect(await proposalExists(id)).toBe(true);
+    expect(proposalSize(id)).toBe(fakePdf.length);
   });
 
-  it('persists other useCase values (linkedin) and alternate userOwner (aj)', () => {
-    const { store, cleanup } = loadStoreInTempDir();
-    try {
-      const id = store.newProposalId();
-      const input = baseInput({ useCase: 'linkedin', userOwner: 'aj' });
-      const fakePdf = Buffer.from('%PDF-fake');
+  it('enrichedCompanyId round-trips when supplied', async () => {
+    const id = newProposalId();
+    const enrichedId = '11111111-2222-3333-4444-555555555555';
+    const input = baseInput({ useCase: 'legacy' });
+    await saveProposal(id, Buffer.from('%PDF'), {
+      id,
+      projectTitle: input.projectTitle,
+      clientName: input.clientName,
+      clientIndustry: input.clientIndustry,
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: '1.0',
+      aiProvider: 'test',
+      sizeBytes: 4,
+      input,
+      enrichedCompanyId: enrichedId,
+      draftStatus: 'generated',
+      sections: {},
+    });
+    const meta = await getProposalMeta(id);
+    expect(meta!.enrichedCompanyId).toBe(enrichedId);
+  });
 
-      store.saveProposal(id, fakePdf, {
-        id,
-        projectTitle: input.projectTitle,
-        clientName: input.clientName,
-        clientIndustry: input.clientIndustry,
-        createdAt: new Date().toISOString(),
-        status: 'generated',
-        version: '1.0',
-        aiProvider: 'test',
-        sizeBytes: fakePdf.length,
-        input,
-      });
+  it('listProposals returns newest-first summaries', async () => {
+    const older = newProposalId();
+    const newer = newProposalId();
+    const input = baseInput();
 
-      const meta = store.getProposalMeta(id);
-      expect(meta!.input.useCase).toBe('linkedin');
-      expect(meta!.input.userOwner).toBe('aj');
-    } finally {
-      cleanup();
-    }
+    await saveProposal(older, Buffer.from('%PDF'), {
+      id: older,
+      projectTitle: 'Older',
+      clientName: 'A',
+      clientIndustry: 'FinTech',
+      createdAt: new Date(Date.now() - 60_000).toISOString(),
+      status: 'generated',
+      version: '1.0',
+      aiProvider: 'test',
+      sizeBytes: 4,
+      input,
+    });
+    await saveProposal(newer, Buffer.from('%PDF'), {
+      id: newer,
+      projectTitle: 'Newer',
+      clientName: 'B',
+      clientIndustry: 'Healthcare',
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: '1.0',
+      aiProvider: 'test',
+      sizeBytes: 4,
+      input,
+    });
+
+    const all = await listProposals();
+    expect(all.map((p) => p.projectTitle)).toEqual(['Newer', 'Older']);
+  });
+
+  it('deleteProposal removes the row AND the PDF directory', async () => {
+    const id = newProposalId();
+    await saveProposal(id, Buffer.from('%PDF'), {
+      id,
+      projectTitle: 't',
+      clientName: 'c',
+      clientIndustry: 'i',
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: '1.0',
+      aiProvider: 'test',
+      sizeBytes: 4,
+      input: baseInput(),
+    });
+    expect(existsSync(proposalDir(id))).toBe(true);
+    const removed = await deleteProposal(id);
+    expect(removed).toBe(true);
+    expect(await proposalExists(id)).toBe(false);
+    expect(existsSync(proposalDir(id))).toBe(false);
+    expect(await deleteProposal(id)).toBe(false); // idempotent on missing id
+  });
+
+  it('saveProposal with a duplicate id upserts instead of failing', async () => {
+    const id = newProposalId();
+    const input = baseInput();
+    await saveProposal(id, Buffer.from('%PDF-v1'), {
+      id,
+      projectTitle: 'First',
+      clientName: 'c',
+      clientIndustry: 'i',
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: '1.0',
+      aiProvider: 'test',
+      sizeBytes: 7,
+      input,
+    });
+    await saveProposal(id, Buffer.from('%PDF-v2-longer'), {
+      id,
+      projectTitle: 'Second',
+      clientName: 'c',
+      clientIndustry: 'i',
+      createdAt: new Date().toISOString(),
+      status: 'generated',
+      version: '1.1',
+      aiProvider: 'test',
+      sizeBytes: 14,
+      input: { ...input, proposalVersion: '1.1' },
+    });
+
+    const meta = await getProposalMeta(id);
+    expect(meta!.projectTitle).toBe('Second');
+    expect(meta!.version).toBe('1.1');
+    expect(meta!.sizeBytes).toBe(14);
   });
 });
