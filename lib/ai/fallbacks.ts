@@ -26,7 +26,7 @@ export function fallbackExecutiveSummary(input: ProposalInput, company: KBCompan
         ? `${input.currency ?? 'USD'} ${input.budgetMin.toLocaleString()} — ${input.budgetMax.toLocaleString()}`
         : 'To be sized in Discovery',
     pricingModel: input.pricingModel ?? 'Fixed Price · Milestone-Linked',
-    closingStatement: `${company.name} has delivered comparable programs in ${company.industriesServed.slice(0, 2).join(' and ')}. We bring the exact blend of engineering, domain fluency, and delivery discipline this engagement demands.`,
+    closingStatement: `${company.name} has delivered comparable programs in ${(company.industriesServed ?? []).slice(0, 2).join(' and ') || 'multiple sectors'}. We bring the exact blend of engineering, domain fluency, and delivery discipline this engagement demands.`,
   };
 }
 
@@ -227,7 +227,7 @@ export function fallbackWhyUs(company: KBCompanyProfile) {
   return {
     differentiators: [
       { icon: '◆', headline: 'We ship in production', description: 'Every case study is live production — not POCs, not demos. Our code runs where revenue and regulation meet.' },
-      { icon: '◆', headline: 'Regulated-industry first', description: `Built for ${company.certifications.slice(0, 3).join(', ') || 'enterprise compliance'} from day one. Compliance is first-class, not a retrofit.` },
+      { icon: '◆', headline: 'Regulated-industry first', description: `Built for ${(company.certifications ?? []).slice(0, 3).join(', ') || 'enterprise compliance'} from day one. Compliance is first-class, not a retrofit.` },
       { icon: '◆', headline: 'Senior-heavy teams', description: 'The engineers named on this proposal are the engineers who will write the code. No bait-and-switch.' },
       { icon: '◆', headline: 'Outcome accountability', description: 'We structure pricing around outcomes where feasible — aligned incentives from day one.' },
       { icon: '◆', headline: 'Full-stack delivery', description: 'Design, engineering, SRE, and compliance under one roof. Fewer handoffs, faster cycle time.' },
