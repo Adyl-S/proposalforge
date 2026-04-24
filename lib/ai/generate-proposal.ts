@@ -6,8 +6,12 @@
  */
 
 import { generate, hasAnyAiProvider } from './ai-client';
+import type { GenerateOptions } from './ai-client';
 import { fetchEnrichedCompany } from '@/lib/rag/scraper-client';
-import type { EnrichedCompany } from './types';
+import { queryRAG, withRagContext, EMPTY_RAG } from '@/lib/rag/client';
+import type { EnrichedCompany, SectionKey } from './types';
+import { loadUseCaseTemplate } from './use-case-templates';
+import type { UseCaseTemplate } from './use-case-templates';
 import { executiveSummaryPrompt } from './prompts/executive-summary';
 import { problemStatementPrompt } from './prompts/problem-statement';
 import { proposedSolutionPrompt } from './prompts/proposed-solution';
@@ -276,6 +280,37 @@ export async function generateProposalData(
   input = await hydrateFromEnriched(input);
   const useAi = hasAnyAiProvider();
   const currency = input.currency ?? 'USD';
+  const template = loadUseCaseTemplate(input.useCase ?? 'legacy');
+
+  // ── RAG pre-flight: fire relevant queries in parallel before section generation ──
+  // Results are injected into proposedSolution (§ tech approach), whyUs (§ about
+  // Phavella), and problemStatement (§ opportunity proof points). Each query
+  // degrades gracefully: empty passages → section generates from LLM base prompt.
+  const userOwner = input.userOwner ?? 'pk';
+  const industry = input.clientIndustry ?? 'technology';
+  const opportunityTitle = (() => {
+    // Best-effort: extract first automation opportunity title from the synthesised
+    // projectPrompt (set by hydrateFromEnriched) or use a generic query.
+    const m = input.projectPrompt.match(/- (.+?) —\s*effort/);
+    return m ? m[1].trim() : `AI automation for ${industry}`;
+  })();
+
+  const [ragTech, ragAbout, ragProof] = await Promise.all([
+    // §5 Technical Approach — architecture + integration patterns
+    useAi && template.sections.includes('proposedSolution')
+      ? queryRAG(`architecture pattern for ${industry}`, userOwner).catch(() => EMPTY_RAG)
+      : Promise.resolve(EMPTY_RAG),
+
+    // §8 About Phavella — team voice + recent project proof
+    useAi && template.sections.includes('whyUs')
+      ? queryRAG(`team bio ${userOwner} recent relevant projects`, userOwner).catch(() => EMPTY_RAG)
+      : Promise.resolve(EMPTY_RAG),
+
+    // §3 Opportunity rationale — proof points for the lead opportunity
+    useAi && template.sections.includes('problemStatement')
+      ? queryRAG(`${opportunityTitle} proof points automation ROI`, userOwner).catch(() => EMPTY_RAG)
+      : Promise.resolve(EMPTY_RAG),
+  ]);
 
   // Kick off all parallelizable AI calls
   const companySnapshot = kb.company;
@@ -288,8 +323,8 @@ export async function generateProposalData(
           key: 'executiveSummary',
           run: async () => {
             const fallback = fb.fallbackExecutiveSummary(input, companySnapshot);
-            if (!useAi) return fallback;
-            const r = await generate(executiveSummaryPrompt(input, companySnapshot));
+            if (!useAi || !template.sections.includes('executiveSummary')) return fallback;
+            const r = await generate(applyTemplate(executiveSummaryPrompt(input, companySnapshot), template, 'executiveSummary'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackExecutiveSummary(input, companySnapshot),
@@ -301,8 +336,15 @@ export async function generateProposalData(
           key: 'problemStatement',
           run: async () => {
             const fallback = fb.fallbackProblemStatement(input);
-            if (!useAi) return fallback;
-            const r = await generate(problemStatementPrompt(input));
+            if (!useAi || !template.sections.includes('problemStatement')) return fallback;
+            // RAG: inject proof points for the opportunity to add credibility
+            const r = await generate(
+              withRagContext(
+                applyTemplate(problemStatementPrompt(input), template, 'problemStatement'),
+                ragProof.passages,
+                'OPPORTUNITY PROOF POINTS (cite these figures verbatim where relevant)',
+              ),
+            );
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackProblemStatement(input),
@@ -314,8 +356,15 @@ export async function generateProposalData(
           key: 'proposedSolution',
           run: async () => {
             const fallback = fb.fallbackProposedSolution(input);
-            if (!useAi) return fallback;
-            const r = await generate(proposedSolutionPrompt(input, companySnapshot));
+            if (!useAi || !template.sections.includes('proposedSolution')) return fallback;
+            // RAG: inject real architecture language for this industry
+            const r = await generate(
+              withRagContext(
+                applyTemplate(proposedSolutionPrompt(input, companySnapshot), template, 'proposedSolution'),
+                ragTech.passages,
+                'ARCHITECTURE REFERENCE (authentic patterns — use terminology verbatim)',
+              ),
+            );
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackProposedSolution(input),
@@ -327,8 +376,8 @@ export async function generateProposalData(
           key: 'methodology',
           run: async () => {
             const fallback = fb.fallbackMethodology(input);
-            if (!useAi) return fallback;
-            const r = await generate(methodologyPrompt(input));
+            if (!useAi || !template.sections.includes('methodology')) return fallback;
+            const r = await generate(applyTemplate(methodologyPrompt(input), template, 'methodology'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackMethodology(input),
@@ -340,8 +389,8 @@ export async function generateProposalData(
           key: 'deliverables',
           run: async () => {
             const fallback = fb.fallbackDeliverables(phaseNamesDefault);
-            if (!useAi) return fallback;
-            const r = await generate(deliverablesPrompt(input, phaseNamesDefault));
+            if (!useAi || !template.sections.includes('deliverables')) return fallback;
+            const r = await generate(applyTemplate(deliverablesPrompt(input, phaseNamesDefault), template, 'deliverables'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackDeliverables(phaseNamesDefault),
@@ -353,8 +402,8 @@ export async function generateProposalData(
           key: 'timeline',
           run: async () => {
             const fallback = fb.fallbackTimeline(input);
-            if (!useAi) return fallback;
-            const r = await generate(timelinePrompt(input));
+            if (!useAi || !template.sections.includes('timeline')) return fallback;
+            const r = await generate(applyTemplate(timelinePrompt(input), template, 'timeline'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackTimeline(input),
@@ -366,8 +415,8 @@ export async function generateProposalData(
           key: 'budget',
           run: async () => {
             const fallback = fb.fallbackBudget(input, phaseNamesDefault);
-            if (!useAi) return fallback;
-            const r = await generate(budgetPrompt(input, phaseNamesDefault));
+            if (!useAi || !template.sections.includes('budget')) return fallback;
+            const r = await generate(applyTemplate(budgetPrompt(input, phaseNamesDefault), template, 'budget'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackBudget(input, phaseNamesDefault),
@@ -379,8 +428,8 @@ export async function generateProposalData(
           key: 'riskMitigation',
           run: async () => {
             const fallback = fb.fallbackRiskMitigation();
-            if (!useAi) return fallback;
-            const r = await generate(riskMitigationPrompt(input));
+            if (!useAi || !template.sections.includes('riskMitigation')) return fallback;
+            const r = await generate(applyTemplate(riskMitigationPrompt(input), template, 'riskMitigation'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackRiskMitigation(),
@@ -392,8 +441,8 @@ export async function generateProposalData(
           key: 'governance',
           run: async () => {
             const fallback = fb.fallbackGovernance(companySnapshot);
-            if (!useAi) return fallback;
-            const r = await generate(governancePrompt(input, companySnapshot));
+            if (!useAi || !template.sections.includes('governance')) return fallback;
+            const r = await generate(applyTemplate(governancePrompt(input, companySnapshot), template, 'governance'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackGovernance(companySnapshot),
@@ -405,8 +454,15 @@ export async function generateProposalData(
           key: 'whyUs',
           run: async () => {
             const fallback = fb.fallbackWhyUs(companySnapshot);
-            if (!useAi) return fallback;
-            const r = await generate(whyUsPrompt(input, companySnapshot));
+            if (!useAi || !template.sections.includes('whyUs')) return fallback;
+            // RAG: inject actual team bios and recent project results for authentic voice
+            const r = await generate(
+              withRagContext(
+                applyTemplate(whyUsPrompt(input, companySnapshot), template, 'whyUs'),
+                ragAbout.passages,
+                'ABOUT PHAVELLA (use this authentic voice — prefer these exact words over generic claims)',
+              ),
+            );
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackWhyUs(companySnapshot),
@@ -418,8 +474,8 @@ export async function generateProposalData(
           key: 'terms',
           run: async () => {
             const fallback = fb.fallbackTerms();
-            if (!useAi) return fallback;
-            const r = await generate(termsPrompt(input));
+            if (!useAi || !template.sections.includes('terms')) return fallback;
+            const r = await generate(applyTemplate(termsPrompt(input), template, 'terms'));
             return mergeWithFallback(r.parsed, fallback);
           },
           fallback: () => fb.fallbackTerms(),
@@ -430,8 +486,8 @@ export async function generateProposalData(
         {
           key: 'teamSelection',
           run: async () => {
-            if (!useAi || kb.team.length === 0) return undefined;
-            const r = await generate(teamSelectionPrompt(input, kb.team));
+            if (!useAi || kb.team.length === 0 || !template.sections.includes('team')) return undefined;
+            const r = await generate(applyTemplate(teamSelectionPrompt(input, kb.team), template, 'team'));
             return (r.parsed as any)?.selections as { id: string; roleOnProject: string; relevance: string }[] | undefined;
           },
           fallback: () => undefined,
@@ -442,8 +498,8 @@ export async function generateProposalData(
         {
           key: 'caseStudySelection',
           run: async () => {
-            if (!useAi || kb.projects.length === 0) return undefined;
-            const r = await generate(caseStudySelectionPrompt(input, kb.projects));
+            if (!useAi || kb.projects.length === 0 || !template.sections.includes('caseStudies')) return undefined;
+            const r = await generate(applyTemplate(caseStudySelectionPrompt(input, kb.projects), template, 'caseStudies'));
             return (r.parsed as any)?.selections as { id: string; reason: string }[] | undefined;
           },
           fallback: () => undefined,
@@ -630,4 +686,24 @@ function pickFeaturedTestimonial(projects: KBProject[]): { quote: string; author
     author: withQuote.testimonial.author,
     authorTitle: withQuote.testimonial.title,
   };
+}
+
+/**
+ * Inject use-case template guidance into a section's GenerateOptions.
+ * Appends systemOverride to the system prompt and per-section guidance to the user message.
+ */
+function applyTemplate(
+  opts: GenerateOptions,
+  template: UseCaseTemplate,
+  key: SectionKey,
+): GenerateOptions {
+  let { system, user } = opts;
+  if (template.systemOverride) {
+    system = `${system}\n\nUSE-CASE CONSTRAINT:\n${template.systemOverride}`;
+  }
+  const guidance = template.promptGuidance[key];
+  if (guidance) {
+    user = `${user}\n\nADDITIONAL GUIDANCE FOR THIS SECTION:\n${guidance}`;
+  }
+  return { ...opts, system, user };
 }
