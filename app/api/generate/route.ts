@@ -26,10 +26,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // Step 5: legacy/small flows must supply enrichedCompanyId OR projectPrompt.
-  // linkedin/upwork still use the textarea path via projectPrompt.
   const hasEnriched = Boolean(input.enrichedCompanyId?.trim());
   const hasTextPrompt = Boolean(input.projectPrompt?.trim());
+
+  // Step 14: legacy/small REQUIRE enrichedCompanyId (scraper-first path).
+  // linkedin/upwork still use the textarea path via projectPrompt.
+  if ((input.useCase === 'legacy' || input.useCase === 'small') && !hasEnriched) {
+    return NextResponse.json(
+      {
+        error:
+          'legacy and small proposals require enrichedCompanyId — run the scraper and approve the analysis first',
+      },
+      { status: 400 },
+    );
+  }
+
   if (!hasEnriched && !hasTextPrompt) {
     return NextResponse.json(
       { error: 'Either enrichedCompanyId or projectPrompt is required' },
